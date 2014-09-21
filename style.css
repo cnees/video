@@ -1,0 +1,36 @@
+*{box-sizing:border-box;}
+#comment, #player, #submitComment {
+	width:600px;
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+}
+#comment {
+	height:80px;
+	margin-top:5px;
+}
+#player {height:400px;}
+.comment {
+	border-bottom:1px solid #000;
+	padding:5px;
+}
+div.modify, .reply {
+	font-size:12px;
+	display:block;
+	float:right;
+}
+span.reply_info {
+	font-size:12px;
+	display:block;
+	float:left;
+}
+a.edit, a.reply {
+	color:#999;
+	text-decoration: none;
+}
+a.edit:hover, a.reply:hover{
+	color:#000;
+}
+a.edit:active, a.reply:active{
+	color:#C00;
+}
