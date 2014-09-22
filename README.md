@@ -1,7 +1,7 @@
 video
 =====
 
-Video comments shouldn't show up all at once. With this tool, the point in a video when you leave a comment is the point when it appears for others. You can use it to reply and ask questions more like in a conversation.
+With this tool, the point in a video when you leave a comment is the point when it appears for others. You can use it to reply and ask questions more like in a conversation.
 
 This tool supports <a href="http://developers.imsglobal.org/">LTI</a> for educational use.
 
