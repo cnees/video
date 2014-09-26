@@ -14,23 +14,38 @@
 	border-bottom:1px solid #000;
 	padding:5px;
 }
+.message {
+	padding:5px;
+	margin:5px;
+}
+.editBox {
+	width:100%;
+}
+[contenteditable="true"]:hover {
+	border-radius:1px;
+    box-shadow:0 0 5px #9ecaed;
+}
 div.modify, .reply {
 	font-size:12px;
 	display:block;
 	float:right;
+}
+div.changeComment {
+	font-size:12px;
+	display:block;
 }
 span.reply_info {
 	font-size:12px;
 	display:block;
 	float:left;
 }
-a.edit, a.reply {
+a.edit, a.reply, a.update, a.cancel {
 	color:#999;
 	text-decoration: none;
 }
-a.edit:hover, a.reply:hover{
+a.edit:hover, a.reply:hover, a.update:hover, a.cancel:hover{
 	color:#000;
 }
-a.edit:active, a.reply:active{
+a.edit:active, a.reply:active, a.update:active, a.cancel:active{
 	color:#C00;
 }

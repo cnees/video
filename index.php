@@ -7,14 +7,14 @@ $LTI = \Tsugi\Core\LTIX::requireData(array('user_id'));
 ?>
 <html>
 	<head>
-		<link rel="stylesheet" type="style/css" href="style.css?v=6">
+		<link rel="stylesheet" type="style/css" href="style.css?v=<?=time();?>">
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 		<script>
 			commentCall = "<?=addSession('comment.php')?>";
 			updateCommentsCall = "<?=addSession('commentsByTime.php')?>";
 			user_id = <?=$USER->id;?>;
 		</script>
-		<script src="video.js"></script>
+		<script src="video.js?v=<?=time();?>"></script>
 	</head>
 	<body>
 		<div id="player"></div>

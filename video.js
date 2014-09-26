@@ -87,34 +87,51 @@ function getComments() {
 			replies = replies + "<div class='comment' style='display:none;' data-time='" + val.videoTime + "'>";
 			replies = replies + "<span class='reply_info'>Posted by " + val.displayname;
 			replies = replies + " at " + timeFormat(val.videoTime) + "</span>";
+			replies = replies + "<a class='reply'>Reply</a>";
+			var truefalse = (val.user_id === user_id.toString())?"true":"false";
+			var editable = "";
 			if(val.user_id === user_id.toString()) {
-				replies = replies + "<div class='modify'><a class='edit'>Edit</a> | <a class='delete'>Delete</a></div>";
-			}
-			else {
-				replies = replies + "<a class='reply'>Reply</a>"
-			}
-			replies = replies + "<p>" + val.comment + "</p></div>\n";
+				editable = " editable";
+			} 
+			replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
 		});
 		$("#comments").html(replies);
-		
 	});
 }
 
 $(document).ready(function() {
 
-	$(document.body).on('click', '.edit', function(event){
+	$(document.body).on('click', '.message.editable', function(event){
 		pauseVideo();
-		var tag = $(this)[0].outerHTML;
-		var len = tag.length;
-		var text = $(this).parent().html();
-		text = text.substring(0, text.length - len);
-		$(this).parent().html("<textarea>" + text + "</textarea>");
+		console.log("editing");
+		var buttons = "<div class='changeComment'><button class='update'>Update</button> <button class='cancel'>Cancel Edit</button> <button class='delete'>Delete Post</button></div>\n";
+		$(this).after(buttons);
+		$(this).removeClass('editable').addClass('editing');
 	});
-	$(document.body).on('click', '.delete', function(event) {
+	$('div').on('click', '.delete', function(event) {
 		pauseVideo();
 		if(confirm("Delete comment")) {
-			console.log("Confirmed");
+			console.log("Delete clicked");
 		}
+	});
+	$('div').on('click', '.update', function(event) {
+		pauseVideo();
+		console.log("Update clicked");
+		var message = $(this).parent().siblings('.message');
+		console.log(message.html());
+		console.log(message.attr("data-id"));
+		var postmessage = {
+			comment: message.html(),
+			update: message.attr("data-id")
+		};
+		$.post(commentCall, postmessage, function(data) {
+			$("#submitStatus").html(data);
+			console.log(data);
+		});
+	});
+	$(document.body).on('click', '.cancel', function(event) {
+		pauseVideo();
+		console.log("Cancel clicked");
 	});
 	$("#comment").focus(function() {
 		pauseVideo();
