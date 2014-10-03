@@ -21,11 +21,18 @@
 .editBox {
 	width:100%;
 }
+.replyBox, .contribution {
+	border: 1px solid #999;
+	margin-top:5px;
+	margin-bottom:5px;
+	padding:5px;
+}
 [contenteditable="true"]:hover {
 	border-radius:1px;
     box-shadow:0 0 5px #9ecaed;
 }
-div.modify, .reply {
+.submitReply, .cancelReply {font-size: 12px;}
+div.modify, .reply{
 	font-size:12px;
 	display:block;
 	float:right;

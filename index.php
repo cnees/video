@@ -9,7 +9,7 @@ use \Tsugi\UI\SettingsForm;
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id'));
 
-// Handle the inoming post
+// Handle the incoming post
 if ( SettingsForm::handleSettingsPost() ) {
     header( 'Location: '.addSession('index.php') ) ;
     return;
@@ -33,25 +33,24 @@ if ( $USER->instructor ) {
     SettingsForm::end();
 }
 
-$assn = Settings::linkGet('video');
-echo("The setting for video is: ".$assn."<br/>\n");
-
 ?>
-		<div id="player"></div>
+		<div id="player">&nbsp;</div>
 		<textarea id="comment">&nbsp;</textarea>
-		
 		<button type="submit" id="submitComment">Submit</button>
-		<div id="time"></div>
-		<div id="submitStatus"></div>
-		<div id="comments"></div> 
+		<div id="time">&nbsp;</div>
+		<div id="submitStatus">&nbsp;</div>
+		<div id="comments">&nbsp;</div> 
 <?php
 $OUTPUT->footerStart();
 ?>
 		<script>
             // Javascript at the end to speed loading
-			commentCall = "<?=addSession('comment.php')?>";
-			updateCommentsCall = "<?=addSession('commentsByTime.php')?>";
-			user_id = <?=$USER->id;?>;
+			COMMENTCALL = "<?=addSession('comment.php')?>";
+			UPDATECOMMENTCALL = "<?=addSession('commentsByTime.php')?>";
+			DELETECOMMENTCALL = "<?=addSession('delete.php')?>";
+			REPLIESCALL = "<?=addSession('fetchReplies.php')?>";
+			VIDEO_ID = "<?=Settings::linkGet('video');?>";
+			USER_ID = <?=$USER->id;?>;
 		</script>
 		<script src="video.js?v=<?=time();?>"></script>
 <?php

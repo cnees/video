@@ -3,7 +3,7 @@ var comments = {
 	lastTime: 0,
 	display: function(videoTime) {
 		var currentTime = player.getCurrentTime();
-		if(currentTime > this.lastTime) {
+		if(currentTime >= this.lastTime) {
 			for(i = Math.floor(this.lastTime); i <= currentTime; i++) {
 				$("[data-time='" + i + "']").css('display', 'block');
 			}
@@ -28,7 +28,7 @@ function onYouTubeIframeAPIReady() {
 	player = new YT.Player('player', {
 		height: '400',
 		width: '600',
-		videoId: 'y8Kyi0WNg40',
+		videoId: VIDEO_ID,
 		playerVars: {origin: 'file://localhost/', rel:0},
 		events: {
 			'onReady': onPlayerReady,
@@ -79,20 +79,32 @@ function timeFormat(seconds) {
 
 function getComments() {
 	var message = {time: player.getCurrentTime()};
-	$.getJSON(updateCommentsCall, message, function(data) {
+	$.getJSON(UPDATECOMMENTCALL, message, function(data) {
 		comments.json = data;
 		console.log(data);
 		var replies = "";
 		$.each(data, function(key, val) {
-			replies = replies + "<div class='comment' style='display:none;' data-time='" + val.videoTime + "'>";
+			var currentTime = player.getCurrentTime();
+			var displayMode = "none";
+			if(val.videoTime <= currentTime) {
+				displayMode = "block";
+			}
+			replies = replies + "<div class='comment' style='display:" + displayMode + ";' data-time='" + val.videoTime + "'>";
 			replies = replies + "<span class='reply_info'>Posted by " + val.displayname;
-			replies = replies + " at " + timeFormat(val.videoTime) + "</span>";
-			replies = replies + "<a class='reply'>Reply</a>";
-			var truefalse = (val.user_id === user_id.toString())?"true":"false";
+			replies = replies + " at " + timeFormat(val.videoTime);
+			if(val.replies > 0) {
+				replies = replies + " | <a class='view_replies'>" + val.replies;
+				if(val.replies > 1) replies = replies + " replies"; // plural
+				else replies = replies + " reply"; // singular
+				replies = replies + "</a>";
+			}
+			replies = replies + "</span>";
+			replies = replies + "<a class='reply'>Contribute</a>";
+			var truefalse = (val.user_id === USER_ID.toString())?"true":"false";
 			var editable = "";
-			if(val.user_id === user_id.toString()) {
+			if(val.user_id === USER_ID.toString()) {
 				editable = " editable";
-			} 
+			}
 			replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
 		});
 		$("#comments").html(replies);
@@ -112,26 +124,88 @@ $(document).ready(function() {
 		pauseVideo();
 		if(confirm("Delete comment")) {
 			console.log("Delete clicked");
+			$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
+			
+			console.log($(this).parent().parent().children('.message').attr('data-id'));
+			var messageID = $(this).parent().parent().children('.message').attr('data-id');
+			$(this).parent().parent().remove();
+			console.log("Message id: " + messageID);
+			var postmessage = {
+				delete: messageID
+			};
+			$.post(DELETECOMMENTCALL, postmessage, function(data) {
+				$("#submitStatus").html(data);
+			});
 		}
 	});
 	$('div').on('click', '.update', function(event) {
 		pauseVideo();
-		console.log("Update clicked");
 		var message = $(this).parent().siblings('.message');
-		console.log(message.html());
-		console.log(message.attr("data-id"));
 		var postmessage = {
 			comment: message.html(),
-			update: message.attr("data-id")
+			update: message.attr('data-id')
 		};
-		$.post(commentCall, postmessage, function(data) {
+		$.post(COMMENTCALL, postmessage, function(data) {
+			$("#submitStatus").html(data);
+		});
+		$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
+		$(this).parent().remove();
+	});
+
+	$('div').on('click', '.reply', function(event) {
+		pauseVideo();
+		var message = $(this).parent().children('.message');
+		if(!message.hasClass("replying")){
+			var buttons = "<button class='submitReply'>Submit</button> <button class='cancelReply'>Cancel</button>\n";
+			$(this).parent().append("<div class='replyBox' contenteditable='true'></div>" + buttons);
+			message.addClass('replying');
+		}
+		console.log("Replying to message " + message.attr('data-id'));
+	});
+
+	$('div').on('click', '.view_replies', function(event) {
+		var container = $(this).parent().parent();
+		var parent_id = container.children('.message').attr('data-id');
+		var message = {
+			parentID: parent_id
+		}
+		$.getJSON(REPLIESCALL, message, function(data) {
+			console.log("Data: " + data);
+			var comments = "<div class='contribution'>";
+			$.each(data, function(key, val) {
+				console.log("Comment" + val.comment);
+				comments = comments + "<div class='contribution'>" + val.comment + "</div>\n";
+			});
+			comments = comments + "</div>";
+			container.append(comments);
+		});
+
+	});
+
+	$('div').on('click', '.submitReply', function(event) {
+		
+		var parentMessage = $(this).parent().children('.replying');
+		console.log("Posting reply: " + $(this).parent().children('.replyBox').html());
+		var message = {
+			time: Math.floor(player.getCurrentTime()),
+			comment: $(this).parent().children('.replyBox').html(),
+			replyTo: parentMessage.attr('data-id'),
+			time: Math.floor(player.getCurrentTime())
+		};
+		$.post(COMMENTCALL, message, function(data) {
 			$("#submitStatus").html(data);
 			console.log(data);
 		});
+		comments.lastTime = 0;
+		getComments();
+
+		parentMessage.removeClass('replying');
+		console.log("Replied to message " + parentMessage.attr('data-id'));
 	});
+
 	$(document.body).on('click', '.cancel', function(event) {
-		pauseVideo();
-		console.log("Cancel clicked");
+		$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
+		$(this).parent().remove();
 	});
 	$("#comment").focus(function() {
 		pauseVideo();
@@ -141,11 +215,10 @@ $(document).ready(function() {
 			time: Math.floor(player.getCurrentTime()),
 			comment: $("#comment").val()
 		};
-		$.post(commentCall, message, function(data) {
+		$.post(COMMENTCALL, message, function(data) {
 			$("#submitStatus").html(data);
 			console.log(data);
 		});
-		playVideo();
 		comments.lastTime = 0;
 		getComments();
 	});
