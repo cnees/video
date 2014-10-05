@@ -11,7 +11,6 @@
 }
 #player {height:400px;}
 .comment {
-	border-bottom:1px solid #000;
 	padding:5px;
 }
 .message {
@@ -21,11 +20,14 @@
 .editBox {
 	width:100%;
 }
-.replyBox, .contribution {
+.replyBox {
 	border: 1px solid #999;
 	margin-top:5px;
 	margin-bottom:5px;
 	padding:5px;
+}
+.contributions {
+	border-left:15px solid #ddd;
 }
 [contenteditable="true"]:hover {
 	border-radius:1px;

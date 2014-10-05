@@ -77,23 +77,30 @@ function timeFormat(seconds) {
 	return formatted;
 }
 
-function getComments() {
-	var message = {time: player.getCurrentTime()};
+function getComments(parent_id) {
+	if(typeof(parent_id)==='undefined') parent_id = -1;
+	console.log("parent_id: " + parent_id);
+	console.log("parent_id type: " + typeof(parent_id));
+	var message = {
+		time: player.getCurrentTime(),
+		parentMessageID: parent_id
+	};
 	$.getJSON(UPDATECOMMENTCALL, message, function(data) {
+		console.log("JSON parent_id: " + typeof(parent_id));
+		console.log("JSON parent_id: " + parent_id.toString());
 		comments.json = data;
-		console.log(data);
 		var replies = "";
 		$.each(data, function(key, val) {
 			var currentTime = player.getCurrentTime();
 			var displayMode = "none";
-			if(val.videoTime <= currentTime) {
+			if(parent_id != -1 || val.videoTime <= currentTime) {
 				displayMode = "block";
 			}
 			replies = replies + "<div class='comment' style='display:" + displayMode + ";' data-time='" + val.videoTime + "'>";
 			replies = replies + "<span class='reply_info'>Posted by " + val.displayname;
 			replies = replies + " at " + timeFormat(val.videoTime);
 			if(val.replies > 0) {
-				replies = replies + " | <a class='view_replies'>" + val.replies;
+				replies = replies + " | <a class='view_replies load_replies'>" + val.replies;
 				if(val.replies > 1) replies = replies + " replies"; // plural
 				else replies = replies + " reply"; // singular
 				replies = replies + "</a>";
@@ -107,7 +114,15 @@ function getComments() {
 			}
 			replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
 		});
-		$("#comments").html(replies);
+		if(parent_id == -1) {
+			$("#comments").html(replies);
+		}
+		else {
+			replies = "<div class='contributions'>" + replies + "</div>";
+			console.log($(".message[data-id=" + parent_id + "]").html());
+			$(".message[data-id=" + parent_id + "]").parent().append(replies);
+			console.log("Appending replies: " + replies);
+		}
 	});
 }
 
@@ -120,6 +135,7 @@ $(document).ready(function() {
 		$(this).after(buttons);
 		$(this).removeClass('editable').addClass('editing');
 	});
+	
 	$('div').on('click', '.delete', function(event) {
 		pauseVideo();
 		if(confirm("Delete comment")) {
@@ -138,6 +154,7 @@ $(document).ready(function() {
 			});
 		}
 	});
+
 	$('div').on('click', '.update', function(event) {
 		pauseVideo();
 		var message = $(this).parent().siblings('.message');
@@ -163,23 +180,26 @@ $(document).ready(function() {
 		console.log("Replying to message " + message.attr('data-id'));
 	});
 
-	$('div').on('click', '.view_replies', function(event) {
+	$('div').on('click', '.view_replies.load_replies', function(event) {
 		var container = $(this).parent().parent();
 		var parent_id = container.children('.message').attr('data-id');
-		var message = {
+		getComments(parent_id);
+		/*var message = {
 			parentID: parent_id
 		}
 		$.getJSON(REPLIESCALL, message, function(data) {
-			console.log("Data: " + data);
-			var comments = "<div class='contribution'>";
+			var comments = "<div class='contributions'>";
 			$.each(data, function(key, val) {
-				console.log("Comment" + val.comment);
 				comments = comments + "<div class='contribution'>" + val.comment + "</div>\n";
 			});
 			comments = comments + "</div>";
 			container.append(comments);
-		});
+		});*/
+		$(this).removeClass("load_replies").addClass("toggle_replies");
+	});
 
+	$('div').on('click', '.view_replies.toggle_replies', function(event) {
+		$(this).parent().parent().children('.contributions').toggle();
 	});
 
 	$('div').on('click', '.submitReply', function(event) {
@@ -207,9 +227,11 @@ $(document).ready(function() {
 		$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
 		$(this).parent().remove();
 	});
+
 	$("#comment").focus(function() {
 		pauseVideo();
 	});
+
 	$("#submitComment").click(function(){
 		var message = {
 			time: Math.floor(player.getCurrentTime()),
