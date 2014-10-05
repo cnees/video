@@ -131,7 +131,7 @@ $(document).ready(function() {
 	$(document.body).on('click', '.message.editable', function(event){
 		pauseVideo();
 		console.log("editing");
-		var buttons = "<div class='changeComment'><button class='update'>Update</button> <button class='cancel'>Cancel Edit</button> <button class='delete'>Delete Post</button></div>\n";
+		var buttons = "<div class='changeComment'><button class='update'>Update</button> <button class='cancel'>Cancel Edit</button> <button class='delete'>Do you want to delete this post and all its replies?</button></div>\n";
 		$(this).after(buttons);
 		$(this).removeClass('editable').addClass('editing');
 	});
