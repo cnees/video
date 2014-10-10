@@ -36,6 +36,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
+	//$("#player").removeAttr('width').removeAttr('height');
 	event.target.playVideo();
 	getComments();
 }

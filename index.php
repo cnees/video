@@ -18,7 +18,7 @@ if ( SettingsForm::handleSettingsPost() ) {
 // Begin the view
 $OUTPUT->header();
 ?>
-		<link rel="stylesheet" type="style/css" href="style.css?v=<?=rand()?>">
+		<link href="style.css?v=<?=rand()?>" rel="stylesheet">
 		<link href="<?php echo($CFG->staticroot); ?>/static/bootstrap-3.1.1/css/bootstrap.min.css" rel="stylesheet">
 <?php
 $OUTPUT->bodyStart();
@@ -38,11 +38,12 @@ if ( $USER->instructor ) {
 <div class="row-fluid">
 	<div class="col-xs-12 col-md-6">
 		<div id="player">&nbsp;</div>
-		<textarea id="comment">&nbsp;</textarea>
+		<textarea id="comment">&nbsp;</textarea><br>
 		<button type="submit" id="submitComment">Post</button><button type="submit" id="saveNote">Save Note</button>
 		<div id="submitStatus">&nbsp;</div>
 	</div>
 	<div class="col-xs-12 col-md-6">
+		<div id="commentsSection">Comments</div>
 		<div id="comments">&nbsp;</div> 
 	</div>
 </div>

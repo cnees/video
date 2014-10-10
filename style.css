@@ -19,6 +19,7 @@
 }
 .comment {
 	padding:5px;
+	padding-right:0px	;
 }
 .message {
 	padding:5px;
@@ -32,15 +33,23 @@
 	margin-top:5px;
 	margin-bottom:5px;
 	padding:5px;
+	height:30px;
 }
 .contributions {
 	border-left:15px solid #ddd;
 }
+
 [contenteditable="true"]:hover {
 	border-radius:1px;
     box-shadow:0 0 5px #9ecaed;
 }
 .submitReply, .cancelReply {font-size: 12px;}
+#commentsSection{
+	font-size:18px!important;
+	background:#ddd;
+	padding:5px;
+	margin:0px;
+}
 div.modify, .reply{
 	font-size:12px;
 	display:block;
