@@ -46,17 +46,6 @@ if ( $USER->instructor ) {
 		<div id="comments">&nbsp;</div> 
 	</div>
 </div>
-<!--
-<div id="column1" role="layout">
-	<div id="player">&nbsp;</div>
-	<textarea id="comment">&nbsp;</textarea>
-	<button type="submit" id="submitComment">Post</button><button type="submit" id="saveNote">Save Note</button>
-	<div id="submitStatus">&nbsp;</div>
-</div>
-<div id="column2" role="layout">
-	<div id="comments">&nbsp;</div> 
-</div>
--->
 <?php
 $OUTPUT->footerStart();
 ?>

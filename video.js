@@ -78,7 +78,6 @@ function timeFormat(seconds) {
 function getComments(parent_id) {
 	if(typeof(parent_id)==='undefined') parent_id = -1;
 	console.log("parent_id: " + parent_id);
-	console.log("parent_id type: " + typeof(parent_id));
 	var message = {
 		time: player.getCurrentTime(),
 		parentMessageID: parent_id
@@ -172,10 +171,15 @@ $(document).ready(function() {
 		var message = $(this).parent().children('.message');
 		if(!message.hasClass("replying")){
 			var buttons = "<button class='submitReply'>Submit</button> <button class='cancelReply'>Cancel</button>\n";
-			$(this).parent().append("<div class='replyBox' contenteditable='true'></div>" + buttons);
+			$(this).parent().append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
 			message.addClass('replying');
 		}
 		console.log("Replying to message " + message.attr('data-id'));
+	});
+
+	$('div').on('click', '.cancelReply', function(event) {
+		console.log("Class: " + $(this).parent().parent().children('.replying').removeClass('replying'));
+		$(this).parent().remove();
 	});
 
 	$('div').on('click', '.view_replies.load_replies', function(event) {
@@ -199,21 +203,19 @@ $(document).ready(function() {
 	$('div').on('click', '.view_replies.toggle_replies', function(event) {
 		var box = $(this).parent().parent().children('.contributions');
 		box.toggle();
-		box.
 		console.log("Toggling " + box.attr("class"));
 	});
 
 	$('div').on('click', '.submitReply', function(event) {
-		
-		var parentMessage = $(this).parent().children('.replying');
+		event.stopPropagation();
+		var parentMessage = $(this).parent().parent().children('.replying');
 		console.log("Posting reply: " + $(this).parent().children('.replyBox').html());
-		var message = {
+		var replymessage = {
 			time: Math.floor(player.getCurrentTime()),
 			comment: $(this).parent().children('.replyBox').html(),
-			replyTo: parentMessage.attr('data-id'),
-			time: Math.floor(player.getCurrentTime())
+			replyTo: parentMessage.attr('data-id')
 		};
-		$.post(COMMENTCALL, message, function(data) {
+		$.post(COMMENTCALL, replymessage, function(data) {
 			$("#submitStatus").html(data);
 			console.log(data);
 		});

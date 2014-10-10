@@ -8,6 +8,7 @@ $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'user_displayname', 'link_
 
 $comment = htmlspecialchars($_POST['comment']);
 if(isset($_POST['update'])) {
+	echo "Update is set";
 	$row = $PDOX->queryDie("UPDATE
 		{$CFG->dbprefix}video_comments
 		SET comment=:CO
@@ -19,6 +20,7 @@ if(isset($_POST['update'])) {
 		":ID" => $_POST['update']));	
 }
 else if(isset($_POST['replyTo'])) {
+	echo "replyTo is set";
 	$time = htmlspecialchars($_POST['time']);
 	$row = $PDOX->queryDie("UPDATE
 		{$CFG->dbprefix}video_comments
@@ -41,6 +43,7 @@ else if(isset($_POST['replyTo'])) {
 	}
 }
 else {
+	echo "Nobody is set";
 	$time = htmlspecialchars($_POST['time']);
 	$row = $PDOX->queryDie("INSERT INTO
 		{$CFG->dbprefix}video_comments(comment, videoTime, displayname, user_id, link_id)
