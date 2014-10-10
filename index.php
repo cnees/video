@@ -36,13 +36,13 @@ if ( $USER->instructor ) {
 
 ?>
 <div class="row-fluid">
-	<div class="col-xs-12 col-md-6">
-		<div id="player">&nbsp;</div>
-		<textarea id="comment">&nbsp;</textarea><br>
-		<button type="submit" id="submitComment">Post</button><button type="submit" id="saveNote">Save Note</button>
+	<div class="col-xs-12 col-md-12">
+		<div id="player" style="resize:vertical;">&nbsp;</div>
+		<textarea placeholder="Leave a response" id="comment"></textarea>
+		<button type="submit" id="submitComment">Save Comment</button><!--<button type="submit" id="saveNote">Save Note</button>-->
 		<div id="submitStatus">&nbsp;</div>
 	</div>
-	<div class="col-xs-12 col-md-6">
+	<div class="col-xs-12 col-md-12">
 		<div id="commentsSection">Comments</div>
 		<div id="comments">&nbsp;</div> 
 	</div>

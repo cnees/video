@@ -138,17 +138,18 @@ $(document).ready(function() {
 		pauseVideo();
 		if(confirm("Do you want to delete this post and all its replies?")) {
 			console.log("Delete clicked");
-			$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
+			var grandparent = $(this).parent().parent();
+			grandparent.children('.editing').removeClass('editing').addClass('editable');
 			
-			console.log($(this).parent().parent().children('.message').attr('data-id'));
-			var messageID = $(this).parent().parent().children('.message').attr('data-id');
-			$(this).parent().parent().remove();
+			console.log(grandparent.children('.message').attr('data-id'));
+			var messageID = grandparent.children('.message').attr('data-id');
+			grandparent.remove();
 			console.log("Message id: " + messageID);
 			var postmessage = {
 				delete: messageID
 			};
 			$.post(DELETECOMMENTCALL, postmessage, function(data) {
-				$("#submitStatus").html(data);
+				//$("#submitStatus").html(data);
 			});
 		}
 	});
@@ -161,7 +162,7 @@ $(document).ready(function() {
 			update: message.attr('data-id')
 		};
 		$.post(COMMENTCALL, postmessage, function(data) {
-			$("#submitStatus").html(data);
+			//$("#submitStatus").html(data);
 		});
 		$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
 		$(this).parent().remove();
@@ -217,8 +218,8 @@ $(document).ready(function() {
 			replyTo: parentMessage.attr('data-id')
 		};
 		$.post(COMMENTCALL, replymessage, function(data) {
-			$("#submitStatus").html(data);
-			console.log(data);
+			//$("#submitStatus").html(data);
+			//console.log(data);
 		});
 		comments.lastTime = 0;
 		getComments();
@@ -242,8 +243,8 @@ $(document).ready(function() {
 			comment: $("#comment").val()
 		};
 		$.post(COMMENTCALL, message, function(data) {
-			$("#submitStatus").html(data);
-			console.log(data);
+			//$("#submitStatus").html(data);
+			//console.log(data);
 		});
 		comments.lastTime = 0;
 		getComments();
