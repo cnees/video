@@ -5,12 +5,12 @@ var comments = {
 		var currentTime = player.getCurrentTime();
 		if(currentTime >= this.lastTime) {
 			for(i = Math.floor(this.lastTime); i <= currentTime; i++) {
-				$("[data-time='" + i + "']").css('display', 'block');
+				$("[data-time='" + i + "']").show();
 			}
 		}
 		else if(currentTime < this.lastTime) {
 			for(i = Math.floor(currentTime); i <= this.lastTime; i++) {
-				$("[data-time='" + i + "']").css('display', 'none');
+				$("[data-time='" + i + "']").hide();
 			}
 		}
 		this.lastTime = currentTime;
@@ -26,8 +26,6 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('player', {
-		height: '400',
-		width: '600',
 		videoId: VIDEO_ID,
 		playerVars: {origin: 'file://localhost/', rel:0},
 		events: {
@@ -131,14 +129,14 @@ $(document).ready(function() {
 	$(document.body).on('click', '.message.editable', function(event){
 		pauseVideo();
 		console.log("editing");
-		var buttons = "<div class='changeComment'><button class='update'>Update</button> <button class='cancel'>Cancel Edit</button> <button class='delete'>Do you want to delete this post and all its replies?</button></div>\n";
+		var buttons = "<div class='changeComment'><button class='update'>Update</button> <button class='cancel'>Cancel Edit</button> <button class='delete'>Delete Comment</button></div>\n";
 		$(this).after(buttons);
 		$(this).removeClass('editable').addClass('editing');
 	});
 	
 	$('div').on('click', '.delete', function(event) {
 		pauseVideo();
-		if(confirm("Delete comment")) {
+		if(confirm("Do you want to delete this post and all its replies?")) {
 			console.log("Delete clicked");
 			$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
 			
@@ -199,7 +197,10 @@ $(document).ready(function() {
 	});
 
 	$('div').on('click', '.view_replies.toggle_replies', function(event) {
-		$(this).parent().parent().children('.contributions').toggle();
+		var box = $(this).parent().parent().children('.contributions');
+		box.toggle();
+		box.
+		console.log("Toggling " + box.attr("class"));
 	});
 
 	$('div').on('click', '.submitReply', function(event) {

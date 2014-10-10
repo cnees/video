@@ -18,7 +18,8 @@ if ( SettingsForm::handleSettingsPost() ) {
 // Begin the view
 $OUTPUT->header();
 ?>
-		<link rel="stylesheet" type="style/css" href="style.css?v=<?=time();?>">
+		<link rel="stylesheet" type="style/css" href="style.css?v=<?=rand()?>">
+		<link href="<?php echo($CFG->staticroot); ?>/static/bootstrap-3.1.1/css/bootstrap.min.css" rel="stylesheet">
 <?php
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
@@ -34,12 +35,28 @@ if ( $USER->instructor ) {
 }
 
 ?>
+<div class="row-fluid">
+	<div class="col-xs-12 col-md-6">
 		<div id="player">&nbsp;</div>
 		<textarea id="comment">&nbsp;</textarea>
-		<button type="submit" id="submitComment">Submit</button>
-		<div id="time">&nbsp;</div>
+		<button type="submit" id="submitComment">Post</button><button type="submit" id="saveNote">Save Note</button>
 		<div id="submitStatus">&nbsp;</div>
+	</div>
+	<div class="col-xs-12 col-md-6">
 		<div id="comments">&nbsp;</div> 
+	</div>
+</div>
+<!--
+<div id="column1" role="layout">
+	<div id="player">&nbsp;</div>
+	<textarea id="comment">&nbsp;</textarea>
+	<button type="submit" id="submitComment">Post</button><button type="submit" id="saveNote">Save Note</button>
+	<div id="submitStatus">&nbsp;</div>
+</div>
+<div id="column2" role="layout">
+	<div id="comments">&nbsp;</div> 
+</div>
+-->
 <?php
 $OUTPUT->footerStart();
 ?>
@@ -52,6 +69,6 @@ $OUTPUT->footerStart();
 			VIDEO_ID = "<?=Settings::linkGet('video');?>";
 			USER_ID = <?=$USER->id;?>;
 		</script>
-		<script src="video.js?v=<?=time();?>"></script>
+		<script src="video.js?v=<?=rand()?>"></script>
 <?php
 $OUTPUT->footerEnd();

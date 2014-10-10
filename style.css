@@ -1,15 +1,22 @@
 *{box-sizing:border-box;}
 #comment, #player, #submitComment {
-	width:600px;
+	/*width:600px;*/
 	display:block;
-	margin-left:auto;
-	margin-right:auto;
 }
 #comment {
+	width:100%;
 	height:80px;
 	margin-top:5px;
 }
-#player {height:400px;}
+#saveNote, #submitComment {
+	width:50%;
+	display:inline-block;
+	margin-top:5px;
+	padding:5px;
+}
+#player {
+	width:100%;
+}
 .comment {
 	padding:5px;
 }
