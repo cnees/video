@@ -37,7 +37,9 @@ if ( $USER->instructor ) {
 ?>
 <div class="row-fluid">
 	<div class="col-xs-12 col-md-12">
-		<div id="player" style="resize:vertical;">&nbsp;</div>
+		<div id="playerwrapper">
+			<div id="player">&nbsp;</div>
+		</div>
 		<textarea placeholder="Leave a response" id="comment"></textarea>
 		<button type="submit" id="submitComment">Save Comment</button><!--<button type="submit" id="saveNote">Save Note</button>-->
 		<div id="submitStatus">&nbsp;</div>
