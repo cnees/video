@@ -208,8 +208,7 @@ $(document).ready(function() {
 
 	$('div').on('click', '.view_replies.toggle_replies', function(event) {
 		var box = $(this).parent().parent().children('.contributions');
-		box.toggleClass("active");
-		box.toggleClass("inactive");
+		box.toggle();
 		console.log("Toggling " + box.attr("class"));
 	});
 
