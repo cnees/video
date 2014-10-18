@@ -5,12 +5,12 @@ var comments = {
 		var currentTime = player.getCurrentTime();
 		if(currentTime >= this.lastTime) {
 			for(i = Math.floor(this.lastTime); i <= currentTime; i++) {
-				$("[data-time='" + i + "']").show();
+				$("[data-time='" + i + "']").removeClass("inactive").addClass("active");
 			}
 		}
 		else if(currentTime < this.lastTime) {
 			for(i = Math.floor(currentTime); i <= this.lastTime; i++) {
-				$("[data-time='" + i + "']").hide();
+				$("[data-time='" + i + "']").removeClass("active").addClass("inactive");
 			}
 		}
 		this.lastTime = currentTime;
@@ -90,11 +90,15 @@ function getComments(parent_id) {
 		var replies = "";
 		$.each(data, function(key, val) {
 			var currentTime = player.getCurrentTime();
-			var displayMode = "none";
-			if(parent_id != -1 || val.videoTime <= currentTime) {
-				displayMode = "block";
+			var active = "inactive";
+			var displayMode = "block";
+			if(val.videoTime <= currentTime) {
+				active = "active";
 			}
-			replies = replies + "<div class='comment' style='display:" + displayMode + ";' data-time='" + val.videoTime + "'>";
+			if(parent_id != -1) {
+				displayMode = "hidden";
+			}
+			replies = replies + "<div class='comment " + active + "' style='display:" + displayMode + "' data-time='" + val.videoTime + "'>";
 			replies = replies + "<span class='reply_info'>Posted by " + val.displayname;
 			replies = replies + " at " + timeFormat(val.videoTime);
 			if(val.replies > 0) {
@@ -204,7 +208,8 @@ $(document).ready(function() {
 
 	$('div').on('click', '.view_replies.toggle_replies', function(event) {
 		var box = $(this).parent().parent().children('.contributions');
-		box.toggle();
+		box.toggleClass("active");
+		box.toggleClass("inactive");
 		console.log("Toggling " + box.attr("class"));
 	});
 

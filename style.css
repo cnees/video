@@ -40,6 +40,14 @@
 .editBox {
 	width:100%;
 }
+.active, .inactive:hover{
+	transition: opacity .1s;
+	opacity:1.0;
+}
+.inactive{
+	transition: opacity .1s;
+	opacity:0.3;
+}
 .replyBox {
 	border: 1px solid #999;
 	margin-top:5px;
