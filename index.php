@@ -40,12 +40,19 @@ if ( $USER->instructor ) {
 		<div id="playerwrapper">
 			<div id="player">&nbsp;</div>
 		</div>
+		<br>
 		<textarea placeholder="Leave a response" id="comment"></textarea>
-		<button type="submit" id="submitComment">Save Comment</button><!--<button type="submit" id="saveNote">Save Note</button>-->
+		<br>
+		<button type="submit" id="submitComment">Save Comment</button>
+		<button type="submit" id="saveNote" alt="Notes are not visible to classmates">Save as Note</button>
+		<div class="infobox">
+			<span class="glyphicon glyphicon-question-sign info" style="color:#ccc;"></span>
+			<span class="info">Comments are visible to anyone logged in. Your notes are only visible to you and your class administrators.</span>
+		</div>
 		<div id="submitStatus">&nbsp;</div>
 	</div>
 	<div class="col-xs-12 col-md-12">
-		<div id="commentsSection">Comments</div>
+		<div id="commentsSection">Replies</div>
 		<div id="comments">&nbsp;</div> 
 	</div>
 </div>

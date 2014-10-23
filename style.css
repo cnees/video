@@ -9,10 +9,8 @@
 	margin-top:5px;
 }
 #saveNote, #submitComment {
-	/*width:50%;*/
+	width:150px;
 	display:inline-block;
-	margin-top:5px;
-	padding:5px;
 }
 #player {
 	width:100%;
@@ -58,7 +56,19 @@
 .contributions {
 	border-left:15px solid #ddd;
 }
-
+.infobox{display:inline-block;vertical-align: top;}
+.info{display:none;padding:5px;}
+.infobox:hover, .infobox:active{
+	position:relative;
+	z-index:4;
+	height:130px;
+	overflow-y:auto;
+	margin-bottom:-150px;
+	width:220px;
+	border:1px solid #999;
+	text-align: justify;
+}
+.infobox:hover .info{display:inline-block;background:#fff;}
 [contenteditable="true"]:hover {
 	border-radius:1px;
     box-shadow:0 0 5px #9ecaed;

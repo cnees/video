@@ -6,9 +6,15 @@ require_once $CFG->dirroot."/pdo.php";
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'user_displayname', 'link_id'));
 
-$comment = htmlspecialchars($_POST['comment']);
+$note = 0;
+if(isset($_POST['note'])) {
+	$note = 1;
+	$comment = htmlspecialchars($_POST['note']);
+}
+else $comment = htmlspecialchars($_POST['comment']);
+
+// UPDATE EXISTING COMMNET
 if(isset($_POST['update'])) {
-	echo "Update is set";
 	$row = $PDOX->queryDie("UPDATE
 		{$CFG->dbprefix}video_comments
 		SET comment=:CO
@@ -20,8 +26,9 @@ if(isset($_POST['update'])) {
 		":ID" => $_POST['update']));	
 }
 else if(isset($_POST['replyTo'])) {
-	echo "replyTo is set";
+	// REPLY TO EXISTING COMMENT
 	$time = htmlspecialchars($_POST['time']);
+	// INCREMENT PARENT COMMENT'S REPLY COUNT
 	$row = $PDOX->queryDie("UPDATE
 		{$CFG->dbprefix}video_comments
 		SET replies = replies + 1
@@ -29,6 +36,7 @@ else if(isset($_POST['replyTo'])) {
 		LIMIT 1",
 		array(":ID" => $_POST['replyTo'])
 	);
+	// ADD CHILD COMMENT
 	if($row->rowCount() == 1) {
 		$row = $PDOX->queryDie("INSERT INTO
 			{$CFG->dbprefix}video_comments(comment, videoTime, displayname, user_id, link_id, parent)
@@ -43,15 +51,16 @@ else if(isset($_POST['replyTo'])) {
 	}
 }
 else {
-	echo "Nobody is set";
+	// ADD NEW COMMENT
 	$time = htmlspecialchars($_POST['time']);
 	$row = $PDOX->queryDie("INSERT INTO
-		{$CFG->dbprefix}video_comments(comment, videoTime, displayname, user_id, link_id)
-		VALUES(:CO, :TI, :DN, :ID, :LID)", array(":CO" => $comment,
+		{$CFG->dbprefix}video_comments(comment, videoTime, displayname, user_id, link_id, private)
+		VALUES(:CO, :TI, :DN, :ID, :LID, :P)", array(":CO" => $comment,
 		":TI" => $time,
 		":DN" => $USER->displayname,
 		":ID" => $USER->id,
-		":LID" => $LINK->id)
+		":LID" => $LINK->id,
+		":P" => $note)
 	);
 }
 ?>

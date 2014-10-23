@@ -87,6 +87,7 @@ function getComments(parent_id) {
 		console.log("JSON parent_id: " + typeof(parent_id));
 		console.log("JSON parent_id: " + parent_id.toString());
 		comments.json = data;
+		console.log(data);
 		var replies = "";
 		$.each(data, function(key, val) {
 			var currentTime = player.getCurrentTime();
@@ -99,7 +100,8 @@ function getComments(parent_id) {
 				displayMode = "hidden";
 			}
 			replies = replies + "<div class='comment " + active + "' style='display:" + displayMode + "' data-time='" + val.videoTime + "'>";
-			replies = replies + "<span class='reply_info'>Posted by " + val.displayname;
+			replies = replies + "<span class='reply_info'>";
+			replies = replies + ((val.private != 0)? "Note" : ("Posted by " + val.displayname));
 			replies = replies + " at " + timeFormat(val.videoTime);
 			if(val.replies > 0) {
 				replies = replies + " | <a class='view_replies load_replies'>" + val.replies;
@@ -249,6 +251,18 @@ $(document).ready(function() {
 		$.post(COMMENTCALL, message, function(data) {
 			//$("#submitStatus").html(data);
 			//console.log(data);
+		});
+		comments.lastTime = 0;
+		getComments();
+	});
+
+	$("#saveNote").click(function(){
+		var message = {
+			time: Math.floor(player.getCurrentTime()),
+			note: $("#comment").val()
+		};
+		$.post(COMMENTCALL, message, function(data) {
+			console.log("sending note");
 		});
 		comments.lastTime = 0;
 		getComments();
