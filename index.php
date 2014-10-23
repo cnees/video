@@ -24,8 +24,11 @@ $OUTPUT->header();
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
 if ( $USER->instructor ) {
-    if ( $USER->instructor ) SettingsForm::button(true);
-    SettingsForm::start(); ?>
+	echo "<p style='text-align:right;'>";
+    SettingsForm::button(false);
+    echo "</p>";
+    SettingsForm::start();
+?>
 <label for="video">
             Please select a YouTube video.<br/>
 <?php

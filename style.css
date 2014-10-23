@@ -60,7 +60,7 @@
 .info{display:none;padding:5px;}
 .infobox:hover, .infobox:active{
 	position:relative;
-	z-index:4;
+	z-index:10;
 	height:130px;
 	overflow-y:auto;
 	margin-bottom:-150px;
