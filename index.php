@@ -44,9 +44,12 @@ if ( $USER->instructor ) {
 			<div id="player">&nbsp;</div>
 		</div>
 		<br>
+		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark <span id="clock">00:00</span></button>
+		<span id="bookmarks">&nbsp;</span>
+		<p>
 		<textarea placeholder="Leave a response" id="comment"></textarea>
-		<br>
-		<button type="submit" id="submitComment">Save Comment</button>
+		</p>
+		<button type="submit" id="submitComment">Save as Comment</button>
 		<button type="submit" id="saveNote" alt="Notes are not visible to classmates">Save as Note</button>
 		<div class="infobox">
 			<span class="glyphicon glyphicon-question-sign info" style="color:#ccc;"></span>
@@ -68,6 +71,7 @@ $OUTPUT->footerStart();
 			UPDATECOMMENTCALL = "<?=addSession('commentsByTime.php')?>";
 			DELETECOMMENTCALL = "<?=addSession('delete.php')?>";
 			REPLIESCALL = "<?=addSession('fetchReplies.php')?>";
+			BOOKMARKCALL = "<?=addSession('bookmark.php')?>";
 			VIDEO_ID = "<?=Settings::linkGet('video');?>";
 			USER_ID = <?=$USER->id;?>;
 		</script>

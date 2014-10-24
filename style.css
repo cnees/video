@@ -68,7 +68,10 @@
 	border:1px solid #999;
 	text-align: justify;
 }
-.infobox:hover .info{display:inline-block;background:#fff;}
+.infobox:hover .info, .infobox:active .info{
+	display:inline-block;
+	background:#fff;
+}
 [contenteditable="true"]:hover {
 	border-radius:1px;
     box-shadow:0 0 5px #9ecaed;

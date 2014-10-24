@@ -1,8 +1,6 @@
 <?php
 require_once "../../config.php";
 require_once $CFG->dirroot."/pdo.php";
-//$LINK->id;
-// see attend database.php
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'user_displayname', 'link_id'));
 
@@ -13,7 +11,7 @@ if(isset($_POST['note'])) {
 }
 else $comment = htmlspecialchars($_POST['comment']);
 
-// UPDATE EXISTING COMMNET
+// UPDATE EXISTING COMMENT
 if(isset($_POST['update'])) {
 	$row = $PDOX->queryDie("UPDATE
 		{$CFG->dbprefix}video_comments

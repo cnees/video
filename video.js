@@ -3,6 +3,7 @@ var comments = {
 	lastTime: 0,
 	display: function(videoTime) {
 		var currentTime = player.getCurrentTime();
+		$("#clock").html(timeFormat(currentTime));
 		if(currentTime >= this.lastTime) {
 			for(i = Math.floor(this.lastTime); i <= currentTime; i++) {
 				$("[data-time='" + i + "']").removeClass("inactive").addClass("active");
@@ -18,7 +19,6 @@ var comments = {
 };
 
 var tag = document.createElement('script');
-
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -27,7 +27,7 @@ var player;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('player', {
 		videoId: VIDEO_ID,
-		playerVars: {origin: 'file://localhost/', rel:0},
+		playerVars: {rel:0},
 		events: {
 			'onReady': onPlayerReady,
 			'onStateChange': onPlayerStateChange
@@ -39,14 +39,14 @@ function onPlayerReady(event) {
 	//$("#player").removeAttr('width').removeAttr('height');
 	event.target.playVideo();
 	getComments();
+	getBookmarks();
 }
 
 function onPlayerStateChange(event) {
 	if (event.data == YT.PlayerState.PLAYING) {
 		displayInterval = setInterval(function() {comments.display();}, 200);
 	}
-	if (event.data === 0) {
-		console.log("Done");
+	if (event.data === 0) { // Video done
 		clearInterval(displayInterval);
 	}
 }
@@ -74,6 +74,22 @@ function timeFormat(seconds) {
 	formatted = formatted + ("0" + minutes).substr(-2,2) + ":";
 	formatted = formatted + ("00" + Math.floor(seconds)).substr(-2,2);
 	return formatted;
+}
+
+function getBookmarks() {
+	var getBookmarksMessage = {
+		fetch: "true"
+	};
+	console.log("Called getBookmarks");
+	$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
+		console.log("Callback called");
+		console.log(data);
+		var times = "";
+		$.each(data, function(key, val) {
+			times = times + "<a data-time='" + val.videoTime + "' class='bookmark'>" + timeFormat(val.videoTime) + "</a>&nbsp; &nbsp;";
+		});
+		$("#bookmarks").html(times);
+	});
 }
 
 function getComments(parent_id) {
@@ -266,6 +282,23 @@ $(document).ready(function() {
 		});
 		comments.lastTime = 0;
 		getComments();
+	});
+
+	$("#bookmark").click(function(){
+		var message = {
+			bookmark: Math.floor(player.getCurrentTime())
+		};
+		console.log(message);
+		$.post(BOOKMARKCALL, message, function(data) {
+			console.log("done");
+			console.log(data);
+		});
+	});
+
+	$(document.body).on('click', '.bookmark', function(){
+		console.log("Clicked bookmark");
+		var time = $(this).attr("data-time");
+		player.seekTo(time);
 	});
 });
 
