@@ -8,7 +8,8 @@ if(isset($_GET['fetch'])) { // Retrieve bookmarks from database
 	$bookmarks = $PDOX->allRowsDie("SELECT videoTime
 		FROM {$CFG->dbprefix}video_bookmarks
 		WHERE user_id = :UID
-		AND link_id = :LID",
+		AND link_id = :LID
+		ORDER BY videoTime ASC",
 		array(
 			":UID" => $USER->id,
 			":LID" => $LINK->id

@@ -86,8 +86,11 @@ function getBookmarks() {
 		console.log(data);
 		var times = "";
 		$.each(data, function(key, val) {
-			times = times + "<a data-time='" + val.videoTime + "' class='bookmark'>" + timeFormat(val.videoTime) + "</a>&nbsp; &nbsp;";
+			times = times + "<a data-bookmark='" + val.videoTime + "' class='bookmark'>&nbsp;" + timeFormat(val.videoTime) + "&nbsp;</a>";
 		});
+		if(times !== "") {
+			times = "<button id='editBookmarks' alt='Edit bookmarks' title='Edit bookmarks'>X</button> " + times;
+		}
 		$("#bookmarks").html(times);
 	});
 }
@@ -285,20 +288,54 @@ $(document).ready(function() {
 	});
 
 	$("#bookmark").click(function(){
+		var time = Math.floor(player.getCurrentTime());
 		var message = {
-			bookmark: Math.floor(player.getCurrentTime())
+			bookmark: time
 		};
 		console.log(message);
 		$.post(BOOKMARKCALL, message, function(data) {
 			console.log("done");
 			console.log(data);
 		});
+		$("#bookmarks").append("<a data-bookmark='" + time + "' class='bookmark'>&nbsp;" + timeFormat(time) + "&nbsp;</a>");
 	});
+
+	var editMode = false;
 
 	$(document.body).on('click', '.bookmark', function(){
 		console.log("Clicked bookmark");
-		var time = $(this).attr("data-time");
-		player.seekTo(time);
+		if(editMode) {
+			var message = {
+				forget: $(this).attr("data-bookmark")
+			};
+			$.post(BOOKMARKCALL, message, function(data) {
+				console.log("removed");
+				console.log(data);
+			});
+			$(this).remove();
+		}
+		else {	
+			var time = $(this).attr("data-bookmark");
+			player.seekTo(time);
+		}
+
 	});
+
+	$(document.body).on('click', '#editBookmarks', function(){
+		console.log("Edit mode");
+		$(this).attr("id", "doneEditingBookmarks");
+		$(this).html("&#10003;");
+		$("#bookmarks").addClass("removing");
+		editMode = true;
+	});
+
+	$(document.body).on('click', '#doneEditingBookmarks', function(){
+		editMode = false;
+		$(this).html("X");
+		$(this).attr("id", "editBookmarks");
+		$("#bookmarks").removeClass("removing");
+
+	});
+	
 });
 

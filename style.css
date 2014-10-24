@@ -83,6 +83,14 @@
 	padding:5px;
 	margin:0px;
 }
+#bookmarks a{text-decoration:none;}
+#bookmarks a:hover{color:#ccc;}
+#bookmarks a:active{color:#000;}
+.removing a {color: #C00;}
+.removing a:hover, .removing a:active {
+	color:#f00!important;
+	text-decoration:line-through!important;
+}
 div.modify, .reply{
 	font-size:12px;
 	display:block;
