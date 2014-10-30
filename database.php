@@ -52,6 +52,19 @@ array( "{$CFG->dbprefix}video_views",
   UNIQUE KEY (`videoTime`,`link_id`),
   KEY `video_views_ibfk_1` (`link_id`),
   CONSTRAINT `video_views_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `lti_link` (`link_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8;")
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8;"),
+
+array( "{$CFG->dbprefix}video_views_by_student",
+"CREATE TABLE `video_views_by_student` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `view_vector` varchar(300) NOT NULL,
+  `link_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`link_id`),
+  KEY `video_views_by_student_ibfk_1` (`link_id`),
+  CONSTRAINT `video_views_by_student_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `lti_link` (`link_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `video_views_by_student_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;")
 
 );
