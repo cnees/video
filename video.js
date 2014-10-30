@@ -18,6 +18,12 @@ var comments = {
 	}
 };
 
+function viewTracker(interval, num_bins) {
+	this.interval = interval;
+	this.num_bins = num_bins;
+	this.bins = Array.apply(null, new Array(this.num_bins)).map(Number.prototype.valueOf,0) // Zero filled array of size num_bins
+}
+
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -35,19 +41,38 @@ function onYouTubeIframeAPIReady() {
 	});
 }
 
+function updateViews() {
+	console.log("Updating views");
+	var bin = Math.floor(player.getCurrentTime() / player.views.interval); // Round down to nearest interval
+	console.log("Bin: " + bin);
+	player.views.bins[bin] += 1;
+	console.log(player.views.bins);
+}
+
 function onPlayerReady(event) {
 	//$("#player").removeAttr('width').removeAttr('height');
 	event.target.playVideo();
 	getComments();
 	getBookmarks();
+	var duration = player.getDuration();
+	var bin_size = Math.max(Math.ceil(duration / 100), 1);
+	player.views = new viewTracker(bin_size, duration/bin_size);
 }
 
 function onPlayerStateChange(event) {
 	if (event.data == YT.PlayerState.PLAYING) {
-		displayInterval = setInterval(function() {comments.display();}, 200);
+		displayInterval = setInterval(function() {comments.display();}, 1000);
+		console.log("Repeat interval: " + player.views.interval);
+		updateViews();
+		updateInterval = setInterval(function() {updateViews();}, player.views.interval * 1000);
+	}
+	else {
+		clearInterval(updateInterval);
 	}
 	if (event.data === 0) { // Video done
+		console.log("Cutting intervals");
 		clearInterval(displayInterval);
+		clearInterval(updateInterval);
 	}
 }
 
@@ -80,9 +105,7 @@ function getBookmarks() {
 	var getBookmarksMessage = {
 		fetch: "true"
 	};
-	console.log("Called getBookmarks");
 	$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
-		console.log("Callback called");
 		console.log(data);
 		var times = "";
 		$.each(data, function(key, val) {
@@ -97,7 +120,6 @@ function getBookmarks() {
 
 function getComments(parent_id) {
 	if(typeof(parent_id)==='undefined') parent_id = -1;
-	console.log("parent_id: " + parent_id);
 	var message = {
 		time: player.getCurrentTime(),
 		parentMessageID: parent_id
@@ -182,6 +204,9 @@ $(document).ready(function() {
 	$('div').on('click', '.update', function(event) {
 		pauseVideo();
 		var message = $(this).parent().siblings('.message');
+		if(! /\S/.test(message.html())) { // Check if string contains only whitespace
+			// Trigger delete instead of update
+		}
 		var postmessage = {
 			comment: message.html(),
 			update: message.attr('data-id')
