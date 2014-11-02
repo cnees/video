@@ -70,7 +70,7 @@ $OUTPUT->footerStart();
 		<script>
             // Javascript at the end to speed loading
 			COMMENTCALL = "<?=addSession('comment.php')?>";
-			UPDATECOMMENTCALL = "<?=addSession('3pdateComments.php')?>";
+			UPDATECOMMENTCALL = "<?=addSession('updateComments.php')?>";
 			DELETECOMMENTCALL = "<?=addSession('delete.php')?>";
 			REPLIESCALL = "<?=addSession('fetchReplies.php')?>";
 			BOOKMARKCALL = "<?=addSession('bookmark.php')?>";
