@@ -44,6 +44,8 @@ if ( $USER->instructor ) {
 			<div id="player">&nbsp;</div>
 		</div>
 		<br>
+		<p><button type="submit" id="playCut">Watch Edited Video</button></p>
+		<p><button type="submit" id="sendData">Send View stats</button></p>
 		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark <span id="clock">00:00</span></button>
 		<span id="bookmarks">&nbsp;</span>
 		<p>
@@ -68,10 +70,11 @@ $OUTPUT->footerStart();
 		<script>
             // Javascript at the end to speed loading
 			COMMENTCALL = "<?=addSession('comment.php')?>";
-			UPDATECOMMENTCALL = "<?=addSession('commentsByTime.php')?>";
+			UPDATECOMMENTCALL = "<?=addSession('3pdateComments.php')?>";
 			DELETECOMMENTCALL = "<?=addSession('delete.php')?>";
 			REPLIESCALL = "<?=addSession('fetchReplies.php')?>";
 			BOOKMARKCALL = "<?=addSession('bookmark.php')?>";
+			VIEWSCALL = "<?=addSession('views.php')?>";
 			VIDEO_ID = "<?=Settings::linkGet('video');?>";
 			USER_ID = <?=$USER->id;?>;
 		</script>

@@ -19,6 +19,7 @@ var comments = {
 };
 
 function viewTracker(interval, num_bins) {
+	console.log("Interval: " + interval + " Num bins: " + num_bins);
 	this.interval = interval;
 	this.num_bins = num_bins;
 	this.bins = Array.apply(null, new Array(this.num_bins)).map(Number.prototype.valueOf,0) // Zero filled array of size num_bins
@@ -42,37 +43,50 @@ function onYouTubeIframeAPIReady() {
 }
 
 function updateViews() {
-	console.log("Updating views");
+	//console.log("Updating views");
 	var bin = Math.floor(player.getCurrentTime() / player.views.interval); // Round down to nearest interval
-	console.log("Bin: " + bin);
+	//console.log("Bin: " + bin);
 	player.views.bins[bin] += 1;
 	console.log(player.views.bins);
 }
 
+function playTimes(times, durations, i) {
+	if(i === 0) playVideo();
+	player.seekTo(times[i]);
+	console.log("Seeking " + times[i]);
+	console.log("Waiting " + durations[i]*1000);
+	if(i + 1 < times.length) {
+		setTimeout(function() {playTimes(times, durations, i + 1);}, durations[i]*1000);
+	}
+	else if(i + 1 === times.length) {
+		pauseVideo();
+	}
+}
+
 function onPlayerReady(event) {
-	//$("#player").removeAttr('width').removeAttr('height');
-	event.target.playVideo();
-	getComments();
-	getBookmarks();
+	playVideo();
+
 	var duration = player.getDuration();
 	var bin_size = Math.max(Math.ceil(duration / 100), 1);
-	player.views = new viewTracker(bin_size, duration/bin_size);
+	player.views = new viewTracker(bin_size, Math.ceil(duration/bin_size));
+
+	getComments();
+	getBookmarks();
 }
 
 function onPlayerStateChange(event) {
+	var updateInterval;
 	if (event.data == YT.PlayerState.PLAYING) {
 		displayInterval = setInterval(function() {comments.display();}, 1000);
-		console.log("Repeat interval: " + player.views.interval);
 		updateViews();
-		updateInterval = setInterval(function() {updateViews();}, player.views.interval * 1000);
+		updateInterval = setInterval(function() {updateViews();}, player.views.interval * 1000 + 100);
 	}
 	else {
 		clearInterval(updateInterval);
 	}
-	if (event.data === 0) { // Video done
+	if (event.data == YT.PlayerState.ENDED) { // Video done
 		console.log("Cutting intervals");
 		clearInterval(displayInterval);
-		clearInterval(updateInterval);
 	}
 }
 
@@ -346,6 +360,12 @@ $(document).ready(function() {
 
 	});
 
+	$(document.body).on('click', '#playCut', function(){
+		var times = [14, 123, 400];
+		var durations = [2.5, 1, 1];
+		playTimes(times, durations, 0);
+	});
+
 	$(document.body).on('click', '#editBookmarks', function(){
 		console.log("Edit mode");
 		$(this).attr("id", "doneEditingBookmarks");
@@ -359,8 +379,15 @@ $(document).ready(function() {
 		$(this).html("X");
 		$(this).attr("id", "editBookmarks");
 		$("#bookmarks").removeClass("removing");
-
 	});
 	
+	$('#sendData').click(function() {
+		var message = {
+			vector: player.views.bins.toString()
+		};
+		$.post(VIEWSCALL, message, function(data) {
+			console.log(data);
+		});
+	});
 });
 
