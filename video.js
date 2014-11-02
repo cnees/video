@@ -216,6 +216,17 @@ var videoViews = {
 		var bin = Math.floor(videoPlayer.player.getCurrentTime() / this.interval); // Round down to nearest interval
 		this.bins[bin] += 1;
 		console.log(this.bins);
+	},
+	sendToDB: function() {
+		var message = {
+			vector: this.bins.toString()
+		};
+		$.post(VIEWSCALL, message, function(data) {
+			console.log(data);
+		});
+		this.bins.map(function(){return 0;}); // Reset views to zero after addind them to the database
+		console.log("Zero bins:");
+		console.log(this.bins);
 	}
 }
 
@@ -436,12 +447,7 @@ $(document).ready(function() {
 	});
 	
 	$('#sendData').click(function() {
-		var message = {
-			vector: player.views.bins.toString()
-		};
-		$.post(VIEWSCALL, message, function(data) {
-			console.log(data);
-		});
+		videoViews.sendToDB();
 	});
 
 });
