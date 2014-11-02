@@ -1,104 +1,13 @@
-var comments = {
-	json: null,
-	lastTime: 0,
-	display: function(videoTime) {
-		var currentTime = player.getCurrentTime();
-		$("#clock").html(timeFormat(currentTime));
-		if(currentTime >= this.lastTime) {
-			for(i = Math.floor(this.lastTime); i <= currentTime; i++) {
-				$("[data-time='" + i + "']").removeClass("inactive").addClass("active");
-			}
-		}
-		else if(currentTime < this.lastTime) {
-			for(i = Math.floor(currentTime); i <= this.lastTime; i++) {
-				$("[data-time='" + i + "']").removeClass("active").addClass("inactive");
-			}
-		}
-		this.lastTime = currentTime;
-	}
-};
+function onYouTubeIframeAPIReady() {videoPlayer.createPlayer();}
 
-function viewTracker(interval, num_bins) {
-	console.log("Interval: " + interval + " Num bins: " + num_bins);
-	this.interval = interval;
-	this.num_bins = num_bins;
-	this.bins = Array.apply(null, new Array(this.num_bins)).map(Number.prototype.valueOf,0) // Zero filled array of size num_bins
-}
+function onPlayerReady(event) {videoPlayer.playerReady(event);}
 
-var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-var player;
-function onYouTubeIframeAPIReady() {
-	player = new YT.Player('player', {
-		videoId: VIDEO_ID,
-		playerVars: {rel:0},
-		events: {
-			'onReady': onPlayerReady,
-			'onStateChange': onPlayerStateChange
-		}
-	});
-}
-
-function updateViews() {
-	//console.log("Updating views");
-	var bin = Math.floor(player.getCurrentTime() / player.views.interval); // Round down to nearest interval
-	//console.log("Bin: " + bin);
-	player.views.bins[bin] += 1;
-	console.log(player.views.bins);
-}
-
-function playTimes(times, durations, i) {
-	if(i === 0) playVideo();
-	player.seekTo(times[i]);
-	console.log("Seeking " + times[i]);
-	console.log("Waiting " + durations[i]*1000);
-	if(i + 1 < times.length) {
-		setTimeout(function() {playTimes(times, durations, i + 1);}, durations[i]*1000);
-	}
-	else if(i + 1 === times.length) {
-		pauseVideo();
-	}
-}
-
-function onPlayerReady(event) {
-	playVideo();
-
-	var duration = player.getDuration();
-	var bin_size = Math.max(Math.ceil(duration / 100), 1);
-	player.views = new viewTracker(bin_size, Math.ceil(duration/bin_size));
-
-	getComments();
-	getBookmarks();
-}
-
-function onPlayerStateChange(event) {
-	var updateInterval;
-	if (event.data == YT.PlayerState.PLAYING) {
-		displayInterval = setInterval(function() {comments.display();}, 1000);
-		updateViews();
-		updateInterval = setInterval(function() {updateViews();}, player.views.interval * 1000 + 100);
-	}
-	else {
-		clearInterval(updateInterval);
-	}
-	if (event.data == YT.PlayerState.ENDED) { // Video done
-		console.log("Cutting intervals");
-		clearInterval(displayInterval);
-	}
-}
-
-function pauseVideo() {
-	player.pauseVideo();
-}
-
-function playVideo() {
-	player.playVideo();
-}
+function onPlayerStateChange(event) {videoPlayer.stateChange(event);}
 
 function timeFormat(seconds) {
+	// Input: Time in seconds
+	// Output: Time in (H:)MM:SS format
+	// Example outputs: 1:44:04, 01:22, 00:01, 141:02:01
 	var formatted = "";
 	var minutes = 0;
 	if(seconds >= 3600) {
@@ -115,154 +24,305 @@ function timeFormat(seconds) {
 	return formatted;
 }
 
-function getBookmarks() {
-	var getBookmarksMessage = {
-		fetch: "true"
-	};
-	$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
-		console.log(data);
-		var times = "";
-		$.each(data, function(key, val) {
-			times = times + "<a data-bookmark='" + val.videoTime + "' class='bookmark'>&nbsp;" + timeFormat(val.videoTime) + "&nbsp;</a>";
+var videoComments = {
+	// TODO: Scroll to newest comments
+	getComments: function (parentID) {
+		console.log("Getting comments");
+		if(typeof(parentID)==='undefined') parentID = -1;
+		var message = {
+			parentMessageID: parentID
+		};
+		$.getJSON(UPDATECOMMENTCALL, message, function(data) {
+			console.log("JSON parentID: " + typeof(parentID));
+			console.log("JSON parentID: " + parentID.toString());
+			comments.json = data;
+			console.log(data);
+			var replies = "";
+			$.each(data, function(key, val) {
+				try {
+					var currentTime = videoPlayer.player.getCurrentTime();
+				}
+				catch(e) {
+					var currentTime = 0;
+				}
+				var active = "inactive";
+				var displayMode = "block";
+				if(val.videoTime <= currentTime) {
+					active = "active";
+				}
+				if(parentID != -1) {
+					displayMode = "hidden";
+				}
+				replies = replies + "<div class='comment " + active + "' style='display:" + displayMode + "' data-time='" + val.videoTime + "'>";
+				replies = replies + "<span class='reply_info'>";
+				replies = replies + ((val.private != 0)? "Note" : ("Posted by " + val.displayname));
+				replies = replies + " at " + timeFormat(val.videoTime);
+				if(val.replies > 0) {
+					replies = replies + " | <a class='view_replies load_replies'>" + val.replies;
+					if(val.replies > 1) replies = replies + " replies"; // plural
+					else replies = replies + " reply"; // singular
+					replies = replies + "</a>";
+				}
+				replies = replies + "</span>";
+				replies = replies + "<a class='reply'>Contribute</a>";
+				var truefalse = (val.user_id === USER_ID.toString())?"true":"false";
+				var editable = "";
+				if(val.user_id === USER_ID.toString()) {
+					editable = " editable";
+				}
+				replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
+			});
+			if(parentID == -1) {
+				$("#comments").html(replies);
+			}
+			else {
+				replies = "<div class='contributions'>" + replies + "</div>";
+				console.log($(".message[data-id=" + parentID + "]").html());
+				$(".message[data-id=" + parentID + "]").parent().append(replies);
+				console.log("Appending replies: " + replies);
+			}
 		});
-		if(times !== "") {
-			times = "<button id='editBookmarks' alt='Edit bookmarks' title='Edit bookmarks'>X</button> " + times;
+	},
+
+	updateInterval: null, // videoPlayer will set updateInterval when the video has loaded. The interval will call display periodically.
+
+	setUpdateInterval: function(i) {
+		if(this.updateInterval === null) {
+			this.updateInterval = setInterval(function() {videoComments.display();}, i * 1000);
 		}
-		$("#bookmarks").html(times);
-	});
+	},
+
+	unsetUpdateInterval: function() {
+		clearInterval(this.updateInterval);
+		this.updateInterval = null;
+	},
+
+	lastUpdate: 0,
+
+	display: function() {
+		var currentTime = videoPlayer.player.getCurrentTime();
+		if(currentTime >= videoComments.lastUpdate) {
+			for(i = Math.floor(videoComments.lastUpdate); i <= currentTime; i++) {
+				$("[data-time='" + i + "']").removeClass("inactive").addClass("active");
+			}
+		}
+		else{
+			for(i = Math.floor(currentTime); i <= videoComments.lastUpdate; i++) {
+				$("[data-time='" + i + "']").removeClass("active").addClass("inactive");
+			}
+		}
+		videoComments.lastUpdate = currentTime;
+	}
 }
 
-function getComments(parent_id) {
-	if(typeof(parent_id)==='undefined') parent_id = -1;
-	var message = {
-		time: player.getCurrentTime(),
-		parentMessageID: parent_id
-	};
-	$.getJSON(UPDATECOMMENTCALL, message, function(data) {
-		console.log("JSON parent_id: " + typeof(parent_id));
-		console.log("JSON parent_id: " + parent_id.toString());
-		comments.json = data;
-		console.log(data);
-		var replies = "";
-		$.each(data, function(key, val) {
-			var currentTime = player.getCurrentTime();
-			var active = "inactive";
-			var displayMode = "block";
-			if(val.videoTime <= currentTime) {
-				active = "active";
+var videoPlayer = {
+
+	player: null,
+
+	createPlayer: function() {
+		this.player = new YT.Player('player', {
+			videoId: VIDEO_ID, // Defined in HTML
+			playerVars: {rel:0},
+			events: {
+				'onReady': onPlayerReady,
+				'onStateChange': onPlayerStateChange
 			}
-			if(parent_id != -1) {
-				displayMode = "hidden";
-			}
-			replies = replies + "<div class='comment " + active + "' style='display:" + displayMode + "' data-time='" + val.videoTime + "'>";
-			replies = replies + "<span class='reply_info'>";
-			replies = replies + ((val.private != 0)? "Note" : ("Posted by " + val.displayname));
-			replies = replies + " at " + timeFormat(val.videoTime);
-			if(val.replies > 0) {
-				replies = replies + " | <a class='view_replies load_replies'>" + val.replies;
-				if(val.replies > 1) replies = replies + " replies"; // plural
-				else replies = replies + " reply"; // singular
-				replies = replies + "</a>";
-			}
-			replies = replies + "</span>";
-			replies = replies + "<a class='reply'>Contribute</a>";
-			var truefalse = (val.user_id === USER_ID.toString())?"true":"false";
-			var editable = "";
-			if(val.user_id === USER_ID.toString()) {
-				editable = " editable";
-			}
-			replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
 		});
-		if(parent_id == -1) {
-			$("#comments").html(replies);
+	},
+
+	playerReady: function(event) {
+		console.log("Player ready");
+		this.player.playVideo();
+		videoComments.setUpdateInterval(1);
+		videoViews.initialize();
+		videoViews.setUpdateInterval();
+		// Every second, check which comments to make black or gray
+	},
+
+	loadAPI: function() {
+		// This code loads the IFrame Player API code asynchronously.
+		var tag = document.createElement('script');
+		tag.src = "https://www.youtube.com/iframe_api";
+		var firstScriptTag = document.getElementsByTagName('script')[0];
+		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+	},
+
+	stateChange: function(event) {
+		if (event.data == YT.PlayerState.PLAYING) {
+			videoComments.setUpdateInterval(1);
+			videoViews.setUpdateInterval();
+		}
+		else { // Not playing
+			videoComments.unsetUpdateInterval();
+			videoViews.unsetUpdateInterval();
+		}
+	},
+
+	playTime: function(cut, duration) {
+		videoPlayer.player.playVideo();
+		videoPlayer.player.seekTo(cut[0]);
+		setTimeout(
+			function() {videoPlayer.playTimes(cut, duration, 0);},
+			duration[0]*1000
+		);
+	},
+
+	playTimes: function(cut, duration, i) {
+		// Don't access this function directly. Use videoPlayer.playTime instead.
+		var offset = cut[i] + duration[i] - videoPlayer.player.getCurrentTime();
+		if(offset > 0) { // Check that player has reached end of interval
+			setTimeout( // Delay until end of interval
+				function() {videoPlayer.playTimes(cut, duration, i);},
+				offset*1000
+			);
+		}
+		else if(i < cut.length) {
+			// Start next interval
+			++i;
+			videoPlayer.player.seekTo(cut[i]);
+			setTimeout(
+				function() {videoPlayer.playTimes(cut, duration, i);},
+				duration[i]*1000
+			);
 		}
 		else {
-			replies = "<div class='contributions'>" + replies + "</div>";
-			console.log($(".message[data-id=" + parent_id + "]").html());
-			$(".message[data-id=" + parent_id + "]").parent().append(replies);
-			console.log("Appending replies: " + replies);
+			videoPlayer.player.pauseVideo();
 		}
-	});
+	}
 }
 
+var videoViews = {
+	interval: 1, // Number of seconds per bin
+	binCount: 100, // Number of bins
+	bins: null, // Array of bins
+	updateInterval: null,
+	setUpdateInterval: function() {
+		if(this.updateInterval === null) {
+			this.updateInterval = setInterval(function() {videoViews.updateViews();}, this.interval * 1000);
+		}
+	},
+	unsetUpdateInterval: function() {
+		clearInterval(this.updateInterval);
+		this.updateInterval = null;
+	},
+	initialize: function() { // Don't initialize until the videoPlayer is ready
+		var duration = videoPlayer.player.getDuration();
+		this.interval = Math.max(Math.ceil(duration / 100), 1);
+		this.binCount = Math.ceil(duration / this.interval);
+		this.bins = Array.apply(null, new Array(this.binCount)).map(Number.prototype.valueOf,0) // Zero filled array of size binCount
+		this.setUpdateInterval(this.interval);
+	},
+	updateViews: function () {
+		var bin = Math.floor(videoPlayer.player.getCurrentTime() / this.interval); // Round down to nearest interval
+		this.bins[bin] += 1;
+		console.log(this.bins);
+	}
+}
+
+var videoBookmarks = {
+	getBookmarks: function () {
+		var getBookmarksMessage = {
+			fetch: "true"
+		};
+		$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
+			console.log(data);
+			var times = "";
+			$.each(data, function(key, val) {
+				times = times + "<a data-bookmark='" + val.videoTime + "' class='bookmark'>&nbsp;" + timeFormat(val.videoTime) + "&nbsp;</a>";
+			});
+			if(times !== "") {
+				// TODO: Make this appear when user adds first bookmark
+				times = "<button id='editBookmarks' alt='Edit bookmarks' title='Edit bookmarks'>X</button> " + times;
+			}
+			$("#bookmarks").html(times);
+		});
+	}
+}
+
+var videoFormActions = {
+	confirm_delete: function(thisButton, message) {
+		if(confirm(message)) {
+			this.delete(thisButton);
+		}
+	},
+
+	delete: function(thisButton) {
+		videoPlayer.player.pauseVideo();
+		console.log("Delete clicked");
+		var grandparent = thisButton.parent().parent();
+		grandparent.children('.editing').removeClass('editing').addClass('editable');
+		console.log(grandparent.children('.message').attr('data-id'));
+		var messageID = grandparent.children('.message').attr('data-id');
+		grandparent.remove();
+		console.log("Message id: " + messageID);
+		var postmessage = {
+			delete: messageID
+		};
+		$.post(DELETECOMMENTCALL, postmessage, function(data) {
+			//$("#submitStatus").html(data);
+		});
+	}
+	
+}
+		
 $(document).ready(function() {
+	videoPlayer.loadAPI();
+	videoComments.getComments();
+	videoBookmarks.getBookmarks();
 
 	$(document.body).on('click', '.message.editable', function(event){
-		pauseVideo();
-		console.log("editing");
+		videoPlayer.player.pauseVideo();
 		var buttons = "<div class='changeComment'><button class='update'>Update</button> <button class='cancel'>Cancel Edit</button> <button class='delete'>Delete Comment</button></div>\n";
 		$(this).after(buttons);
 		$(this).removeClass('editable').addClass('editing');
 	});
 	
 	$('div').on('click', '.delete', function(event) {
-		pauseVideo();
-		if(confirm("Do you want to delete this post and all its replies?")) {
-			console.log("Delete clicked");
-			var grandparent = $(this).parent().parent();
-			grandparent.children('.editing').removeClass('editing').addClass('editable');
-			
-			console.log(grandparent.children('.message').attr('data-id'));
-			var messageID = grandparent.children('.message').attr('data-id');
-			grandparent.remove();
-			console.log("Message id: " + messageID);
-			var postmessage = {
-				delete: messageID
-			};
-			$.post(DELETECOMMENTCALL, postmessage, function(data) {
-				//$("#submitStatus").html(data);
-			});
-		}
+		event.stopPropagation();
+		videoFormActions.confirm_delete($(this), "Do you want to delete this post and all its replies?");
 	});
 
 	$('div').on('click', '.update', function(event) {
-		pauseVideo();
+		event.stopPropagation();
+		videoPlayer.player.pauseVideo();
 		var message = $(this).parent().siblings('.message');
-		if(! /\S/.test(message.html())) { // Check if string contains only whitespace
-			// Trigger delete instead of update
+		var nonWhitespaceCharacter = /\S/;
+		if(!nonWhitespaceCharacter.test(message.text())) { // Check if string contains only whitespace
+			videoFormActions.confirm_delete($(this),
+				"Message is empty. Do you want to delete this post and all its replies?"
+			);
 		}
-		var postmessage = {
-			comment: message.html(),
-			update: message.attr('data-id')
-		};
-		$.post(COMMENTCALL, postmessage, function(data) {
-			//$("#submitStatus").html(data);
-		});
-		$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
-		$(this).parent().remove();
+		else {
+			var postmessage = {
+				comment: message.text(),	// TODO: Make this preserve line breaks
+				update: message.attr('data-id')
+			};
+			$.post(COMMENTCALL, postmessage, function(data) {/*$("#submitStatus").html(data);*/});
+			$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
+			$(this).parent().remove();
+		}
 	});
 
 	$('div').on('click', '.reply', function(event) {
-		pauseVideo();
+		// TODO: Clear text from reply box and scroll to comment on submit
+		videoPlayer.player.pauseVideo();
 		var message = $(this).parent().children('.message');
 		if(!message.hasClass("replying")){
 			var buttons = "<button class='submitReply'>Submit</button> <button class='cancelReply'>Cancel</button>\n";
 			$(this).parent().append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
 			message.addClass('replying');
 		}
-		console.log("Replying to message " + message.attr('data-id'));
 	});
 
 	$('div').on('click', '.cancelReply', function(event) {
-		console.log("Class: " + $(this).parent().parent().children('.replying').removeClass('replying'));
+		$(this).parent().parent().children('.replying').removeClass('replying');
 		$(this).parent().remove();
 	});
 
 	$('div').on('click', '.view_replies.load_replies', function(event) {
 		var container = $(this).parent().parent();
 		var parent_id = container.children('.message').attr('data-id');
-		getComments(parent_id);
-		/*var message = {
-			parentID: parent_id
-		}
-		$.getJSON(REPLIESCALL, message, function(data) {
-			var comments = "<div class='contributions'>";
-			$.each(data, function(key, val) {
-				comments = comments + "<div class='contribution'>" + val.comment + "</div>\n";
-			});
-			comments = comments + "</div>";
-			container.append(comments);
-		});*/
+		videoComments.getComments(parent_id);
 		$(this).removeClass("load_replies").addClass("toggle_replies");
 	});
 
@@ -277,16 +337,13 @@ $(document).ready(function() {
 		var parentMessage = $(this).parent().parent().children('.replying');
 		console.log("Posting reply: " + $(this).parent().children('.replyBox').html());
 		var replymessage = {
-			time: Math.floor(player.getCurrentTime()),
+			time: Math.floor(videoPlayer.player.getCurrentTime()),
 			comment: $(this).parent().children('.replyBox').html(),
 			replyTo: parentMessage.attr('data-id')
 		};
-		$.post(COMMENTCALL, replymessage, function(data) {
-			//$("#submitStatus").html(data);
-			//console.log(data);
-		});
+		$.post(COMMENTCALL, replymessage, function(data) {/*console.log(data);*/});
 		comments.lastTime = 0;
-		getComments();
+		videoComments.getComments();
 
 		parentMessage.removeClass('replying');
 		console.log("Replied to message " + parentMessage.attr('data-id'));
@@ -294,40 +351,38 @@ $(document).ready(function() {
 
 	$(document.body).on('click', '.cancel', function(event) {
 		$(this).parent().parent().children('.editing').removeClass('editing').addClass('editable');
+		// TODO: Restore original text when edit is canceled
 		$(this).parent().remove();
 	});
 
 	$("#comment").focus(function() {
-		pauseVideo();
+		videoPlayer.player.pauseVideo();
 	});
 
 	$("#submitComment").click(function(){
 		var message = {
-			time: Math.floor(player.getCurrentTime()),
+			time: Math.floor(videoPlayer.player.getCurrentTime()),
 			comment: $("#comment").val()
 		};
-		$.post(COMMENTCALL, message, function(data) {
-			//$("#submitStatus").html(data);
-			//console.log(data);
-		});
-		comments.lastTime = 0;
-		getComments();
+		$.post(COMMENTCALL, message, function(data) {/*console.log(data);*/});
+		videoComments.lastUpdate = 0;
+		videoComments.getComments();
 	});
 
 	$("#saveNote").click(function(){
 		var message = {
-			time: Math.floor(player.getCurrentTime()),
+			time: Math.floor(videoPlayer.player.getCurrentTime()),
 			note: $("#comment").val()
 		};
 		$.post(COMMENTCALL, message, function(data) {
 			console.log("sending note");
 		});
-		comments.lastTime = 0;
-		getComments();
+		videoComments.lastUpdate = 0;
+		videoComments.getComments();
 	});
 
 	$("#bookmark").click(function(){
-		var time = Math.floor(player.getCurrentTime());
+		var time = Math.floor(videoPlayer.player.getCurrentTime());
 		var message = {
 			bookmark: time
 		};
@@ -355,15 +410,14 @@ $(document).ready(function() {
 		}
 		else {	
 			var time = $(this).attr("data-bookmark");
-			player.seekTo(time);
+			videoPlayer.player.seekTo(time);
 		}
-
 	});
 
 	$(document.body).on('click', '#playCut', function(){
 		var times = [14, 123, 400];
-		var durations = [2.5, 1, 1];
-		playTimes(times, durations, 0);
+		var durations = [5, 5, 5];
+		videoPlayer.playTime(times, durations, 0);
 	});
 
 	$(document.body).on('click', '#editBookmarks', function(){
@@ -389,5 +443,5 @@ $(document).ready(function() {
 			console.log(data);
 		});
 	});
-});
 
+});
