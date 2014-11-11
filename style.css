@@ -91,27 +91,25 @@
 	color:#f00!important;
 	text-decoration:line-through!important;
 }
-div.modify, .reply{
-	font-size:12px;
-	display:block;
-	float:right;
-}
-div.changeComment {
-	font-size:12px;
-	display:block;
-}
 span.reply_info {
 	font-size:12px;
 	display:block;
 	float:left;
 }
-a.edit, a.reply, a.update, a.cancel {
+div.modify, .reply, .report{
+	font-size:12px;
+}
+div.changeComment {
+	font-size:12px;
+	display:block;
+}
+a.edit, a.reply, a.report, a.update, a.cancel {
 	color:#999;
 	text-decoration: none;
 }
-a.edit:hover, a.reply:hover, a.update:hover, a.cancel:hover{
+a.edit:hover, a.reply:hover, a.report:hover, a.update:hover, a.cancel:hover{
 	color:#000;
 }
-a.edit:active, a.reply:active, a.update:active, a.cancel:active{
+a.edit:active, a.reply:active, a.report:active, a.update:active, a.cancel:active{
 	color:#C00;
 }

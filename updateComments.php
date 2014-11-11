@@ -14,6 +14,9 @@ if($parentID == -1) { // Load comments without parents (comments that are not re
 			NOT private
 			OR user_id = :UID
 		)
+		AND (
+			NOT reports
+		)
 		ORDER BY videoTime ASC LIMIT 100",
 		array(":UID" => $USER->id, ":LID" => $LINK->id, ":UID" => $USER->id)
 	);
@@ -25,6 +28,9 @@ else { // Load replies to parent
 		AND (
 			NOT private
 			OR user_id = :UID
+		)
+		AND (
+			NOT reports
 		)
 		ORDER BY videoTime ASC LIMIT 100",
 		array(":LID" => $LINK->id, ":PID" => $parentID, ":UID" => $USER->id)

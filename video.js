@@ -64,7 +64,7 @@ var videoComments = {
 					replies = replies + "</a>";
 				}
 				replies = replies + "</span>";
-				replies = replies + "<a class='reply'>Contribute</a>";
+				replies = replies + "<span style='float:right'><a class='reply' data-id='" + val.id + "'>Contribute</a> | <a class='report' data-id='" + val.id + "'>Report</a></span>";
 				var truefalse = (val.user_id === USER_ID.toString())?"true":"false";
 				var editable = "";
 				if(val.user_id === USER_ID.toString()) {
@@ -317,10 +317,10 @@ $(document).ready(function() {
 	$('div').on('click', '.reply', function(event) {
 		// TODO: Clear text from reply box and scroll to comment on submit
 		videoPlayer.player.pauseVideo();
-		var message = $(this).parent().children('.message');
+		var message = $(this).parent().parent().children('.message');
 		if(!message.hasClass("replying")){
 			var buttons = "<button class='submitReply'>Submit</button> <button class='cancelReply'>Cancel</button>\n";
-			$(this).parent().append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
+			$(this).parent().parent().append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
 			message.addClass('replying');
 		}
 	});
@@ -346,7 +346,7 @@ $(document).ready(function() {
 	$('div').on('click', '.submitReply', function(event) {
 		event.stopPropagation();
 		var parentMessage = $(this).parent().parent().children('.replying');
-		console.log("Posting reply: " + $(this).parent().children('.replyBox').html());
+		//console.log("Posting reply: " + $(this).parent().children('.replyBox').html());
 		var replymessage = {
 			time: Math.floor(videoPlayer.player.getCurrentTime()),
 			comment: $(this).parent().children('.replyBox').html(),
@@ -375,7 +375,10 @@ $(document).ready(function() {
 			time: Math.floor(videoPlayer.player.getCurrentTime()),
 			comment: $("#comment").val()
 		};
-		$.post(COMMENTCALL, message, function(data) {/*console.log(data);*/});
+		$.post(COMMENTCALL, message, function(data) {
+			/*console.log(data);*/
+			$("#comment").val("");
+		});
 		videoComments.lastUpdate = 0;
 		videoComments.getComments();
 	});
@@ -386,7 +389,7 @@ $(document).ready(function() {
 			note: $("#comment").val()
 		};
 		$.post(COMMENTCALL, message, function(data) {
-			console.log("sending note");
+			$("#comment").val("");
 		});
 		videoComments.lastUpdate = 0;
 		videoComments.getComments();
@@ -425,6 +428,20 @@ $(document).ready(function() {
 		}
 	});
 
+	$(document.body).on('click', '.report', function(){
+		console.log("Reporting " + $(this).attr('data-id'));
+		videoPlayer.player.pauseVideo();
+		if(confirm("Report this message?")) {
+			$(this).parent().parent().children(".message").html("-reported-");
+			var report_id = $(this).parent().parent().children('.message').attr('data-id');
+			var message = {id: report_id};
+			$.post(REPORTCALL, message, function(data) {
+				console.log("reported");
+				console.log(data);
+			});
+		}
+	});
+
 	$(document.body).on('click', '#playCut', function(){
 		var times = [14, 123, 400];
 		var durations = [5, 5, 5];
@@ -449,5 +466,4 @@ $(document).ready(function() {
 	$('#sendData').click(function() {
 		videoViews.sendToDB();
 	});
-
 });
