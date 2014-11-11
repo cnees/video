@@ -224,7 +224,9 @@ var videoViews = {
 		$.post(VIEWSCALL, message, function(data) {
 			console.log(data);
 		});
-		this.bins.map(function(){return 0;}); // Reset views to zero after addind them to the database
+		var i = this.bins.length - 1;
+		while(i >= 0) this.bins[i--] = 0;
+		//this.bins.map(function(){return 0;}); // Reset views to zero after adding them to the database
 		console.log("Zero bins:");
 		console.log(this.bins);
 	}
