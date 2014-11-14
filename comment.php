@@ -37,8 +37,8 @@ else if(isset($_POST['replyTo'])) {
 	// ADD CHILD COMMENT
 	if($row->rowCount() == 1) {
 		$row = $PDOX->queryDie("INSERT INTO
-			{$CFG->dbprefix}video_comments(comment, videoTime, displayname, user_id, link_id, parent)
-			VALUES(:CO, :TI, :DN, :ID, :LID, :PA)",
+			{$CFG->dbprefix}video_comments(comment, videoTime, displayname, user_id, link_id, parent, private)
+			VALUES(:CO, :TI, :DN, :ID, :LID, :PA, 0)",
 			array(":CO" => $comment,
 			":TI" => $time,
 			":DN" => $USER->displayname,

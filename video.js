@@ -27,16 +27,14 @@ function timeFormat(seconds) {
 var videoComments = {
 	// TODO: Scroll to newest comments
 	getComments: function (parentID) {
-		console.log("Getting comments");
 		if(typeof(parentID)==='undefined') parentID = -1;
 		var message = {
 			parentMessageID: parentID
 		};
 		$.getJSON(UPDATECOMMENTCALL, message, function(data) {
-			console.log("JSON parentID: " + typeof(parentID));
-			console.log("JSON parentID: " + parentID.toString());
-			comments.json = data;
-			console.log(data);
+			//console.log("JSON parentID: " + typeof(parentID));
+			//console.log("JSON parentID: " + parentID.toString());
+			//console.log(data);
 			var replies = "";
 			$.each(data, function(key, val) {
 				try {
@@ -77,10 +75,11 @@ var videoComments = {
 			}
 			else {
 				replies = "<div class='contributions'>" + replies + "</div>";
-				console.log($(".message[data-id=" + parentID + "]").html());
+				//console.log($(".message[data-id=" + parentID + "]").html());
 				$(".message[data-id=" + parentID + "]").parent().append(replies);
-				console.log("Appending replies: " + replies);
+				//console.log("Appending replies: " + replies);
 			}
+			videoComments.display();
 		});
 	},
 
@@ -101,7 +100,7 @@ var videoComments = {
 
 	display: function() {
 		var currentTime = videoPlayer.player.getCurrentTime();
-		if(currentTime >= videoComments.lastUpdate) {
+		if(currentTime >= Math.floor(videoComments.lastUpdate)) {
 			for(i = Math.floor(videoComments.lastUpdate); i <= currentTime; i++) {
 				$("[data-time='" + i + "']").removeClass("inactive").addClass("active");
 			}
@@ -131,7 +130,6 @@ var videoPlayer = {
 	},
 
 	playerReady: function(event) {
-		console.log("Player ready");
 		this.player.playVideo();
 		videoComments.setUpdateInterval(1);
 		videoViews.initialize();
@@ -151,10 +149,14 @@ var videoPlayer = {
 		if (event.data == YT.PlayerState.PLAYING) {
 			videoComments.setUpdateInterval(1);
 			videoViews.setUpdateInterval();
+
 		}
 		else { // Not playing
 			videoComments.unsetUpdateInterval();
 			videoViews.unsetUpdateInterval();
+		}
+		if(event.data == YT.PlayerState.ENDED) {
+			videoViews.sendToDB();
 		}
 	},
 
@@ -196,6 +198,7 @@ var videoViews = {
 	binCount: 100, // Number of bins
 	bins: null, // Array of bins
 	updateInterval: null,
+	counter: 0, // Number of times videoViews has been updated since last database update
 	setUpdateInterval: function() {
 		if(this.updateInterval === null) {
 			this.updateInterval = setInterval(function() {videoViews.updateViews();}, this.interval * 1000);
@@ -213,22 +216,31 @@ var videoViews = {
 		this.setUpdateInterval(this.interval);
 	},
 	updateViews: function () {
+
 		var bin = Math.floor(videoPlayer.player.getCurrentTime() / this.interval); // Round down to nearest interval
 		this.bins[bin] += 1;
-		console.log(this.bins);
+		this.counter++;
+		//console.log(this.bins);
+		//console.log("Counter: " + this.counter);
+		if(this.counter === 5) {
+			this.sendToDB();
+		}
 	},
 	sendToDB: function() {
+		this.counter = 0;
 		var message = {
 			vector: this.bins.toString()
 		};
 		$.post(VIEWSCALL, message, function(data) {
-			console.log(data);
+			//console.log(data);
 		});
 		var i = this.bins.length - 1;
 		while(i >= 0) this.bins[i--] = 0;
 		//this.bins.map(function(){return 0;}); // Reset views to zero after adding them to the database
-		console.log("Zero bins:");
-		console.log(this.bins);
+		var message = {};
+		$.get(GRAPHCALL, message, function(data){
+			//console.log(data);
+		});
 	}
 }
 
@@ -238,15 +250,13 @@ var videoBookmarks = {
 			fetch: "true"
 		};
 		$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
-			console.log(data);
+			//console.log(data);
 			var times = "";
 			$.each(data, function(key, val) {
 				times = times + "<a data-bookmark='" + val.videoTime + "' class='bookmark'>&nbsp;" + timeFormat(val.videoTime) + "&nbsp;</a>";
 			});
-			if(times !== "") {
-				// TODO: Make this appear when user adds first bookmark
-				times = "<button id='editBookmarks' alt='Edit bookmarks' title='Edit bookmarks'>X</button> " + times;
-			}
+			times = "<button id='editBookmarks' alt='Edit bookmarks' title='Edit bookmarks'>X</button> " + times;
+			//TODO: Disable button when there are no comments
 			$("#bookmarks").html(times);
 		});
 	}
@@ -261,21 +271,21 @@ var videoFormActions = {
 
 	delete: function(thisButton) {
 		videoPlayer.player.pauseVideo();
-		console.log("Delete clicked");
 		var grandparent = thisButton.parent().parent();
 		grandparent.children('.editing').removeClass('editing').addClass('editable');
-		console.log(grandparent.children('.message').attr('data-id'));
+		//console.log(grandparent.children('.message').attr('data-id'));
 		var messageID = grandparent.children('.message').attr('data-id');
 		grandparent.remove();
-		console.log("Message id: " + messageID);
+		//console.log("Message id: " + messageID);
 		var postmessage = {
 			delete: messageID
 		};
 		$.post(DELETECOMMENTCALL, postmessage, function(data) {
 			//$("#submitStatus").html(data);
 		});
+		comments.lastTime = 0;
+		videoComments.getComments();
 	}
-	
 }
 		
 $(document).ready(function() {
@@ -318,12 +328,17 @@ $(document).ready(function() {
 
 	$('div').on('click', '.reply', function(event) {
 		// TODO: Clear text from reply box and scroll to comment on submit
+		event.stopPropagation();
 		videoPlayer.player.pauseVideo();
 		var message = $(this).parent().parent().children('.message');
 		if(!message.hasClass("replying")){
 			var buttons = "<button class='submitReply'>Submit</button> <button class='cancelReply'>Cancel</button>\n";
 			$(this).parent().parent().append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
 			message.addClass('replying');
+		}
+		else {
+			$(this).parent().siblings(".replyContainer").remove();
+			$(this).parent().parent().children('.replying').removeClass('replying');
 		}
 	});
 
@@ -342,7 +357,6 @@ $(document).ready(function() {
 	$('div').on('click', '.view_replies.toggle_replies', function(event) {
 		var box = $(this).parent().parent().children('.contributions');
 		box.toggle();
-		console.log("Toggling " + box.attr("class"));
 	});
 
 	$('div').on('click', '.submitReply', function(event) {
@@ -354,12 +368,13 @@ $(document).ready(function() {
 			comment: $(this).parent().children('.replyBox').html(),
 			replyTo: parentMessage.attr('data-id')
 		};
-		$.post(COMMENTCALL, replymessage, function(data) {/*console.log(data);*/});
-		comments.lastTime = 0;
-		videoComments.getComments();
-
+		$.post(COMMENTCALL, replymessage, function(data) {
+			/*console.log(data);*/
+			comments.lastTime = 0;
+			videoComments.getComments();
+		});
 		parentMessage.removeClass('replying');
-		console.log("Replied to message " + parentMessage.attr('data-id'));
+		//console.log("Replied to message " + parentMessage.attr('data-id'));
 	});
 
 	$(document.body).on('click', '.cancel', function(event) {
@@ -380,9 +395,9 @@ $(document).ready(function() {
 		$.post(COMMENTCALL, message, function(data) {
 			/*console.log(data);*/
 			$("#comment").val("");
+			videoComments.lastUpdate = 0;
+			videoComments.getComments();
 		});
-		videoComments.lastUpdate = 0;
-		videoComments.getComments();
 	});
 
 	$("#saveNote").click(function(){
@@ -392,9 +407,36 @@ $(document).ready(function() {
 		};
 		$.post(COMMENTCALL, message, function(data) {
 			$("#comment").val("");
+			videoComments.lastUpdate = 0;
+			videoComments.getComments();
 		});
-		videoComments.lastUpdate = 0;
-		videoComments.getComments();
+	});
+
+	$(document.body).on('click', '.report', function(){
+		//console.log("Reporting " + $(this).attr('data-id'));
+		videoPlayer.player.pauseVideo();
+		if(confirm("Report this message?")) {
+			$(this).parent().parent().children(".message").html("-reported-");
+			var report_id = $(this).parent().parent().children('.message').attr('data-id');
+			var message = {id: report_id};
+			$.post(REPORTCALL, message, function(data) {
+				//console.log(data);
+			});
+		}
+	});
+
+	$(document.body).on('click', '#playCut', function(){
+		var times = [103, 153, 432, 597, 755, 779, 997, 1004];
+		var durations = [13, 4, 5, 3, 13, 18, 4, 0];
+		videoPlayer.playTime(times, durations, 0);
+	});
+
+	$(document.body).on('click', '#editBookmarks', function(){
+		//console.log("Edit mode");
+		$(this).attr("id", "doneEditingBookmarks");
+		$(this).html("&#10003;");
+		$("#bookmarks").addClass("removing");
+		editMode = true;
 	});
 
 	$("#bookmark").click(function(){
@@ -402,25 +444,24 @@ $(document).ready(function() {
 		var message = {
 			bookmark: time
 		};
-		console.log(message);
+		//console.log(message);
 		$.post(BOOKMARKCALL, message, function(data) {
-			console.log("done");
-			console.log(data);
+			//console.log(data);
 		});
+		// TODO: Sort appended bookmarks by time?
+		// TODO: Prevent appending duplicate bookmarks
 		$("#bookmarks").append("<a data-bookmark='" + time + "' class='bookmark'>&nbsp;" + timeFormat(time) + "&nbsp;</a>");
 	});
 
 	var editMode = false;
 
 	$(document.body).on('click', '.bookmark', function(){
-		console.log("Clicked bookmark");
 		if(editMode) {
 			var message = {
 				forget: $(this).attr("data-bookmark")
 			};
 			$.post(BOOKMARKCALL, message, function(data) {
-				console.log("removed");
-				console.log(data);
+				//console.log(data);
 			});
 			$(this).remove();
 		}
@@ -430,33 +471,6 @@ $(document).ready(function() {
 		}
 	});
 
-	$(document.body).on('click', '.report', function(){
-		console.log("Reporting " + $(this).attr('data-id'));
-		videoPlayer.player.pauseVideo();
-		if(confirm("Report this message?")) {
-			$(this).parent().parent().children(".message").html("-reported-");
-			var report_id = $(this).parent().parent().children('.message').attr('data-id');
-			var message = {id: report_id};
-			$.post(REPORTCALL, message, function(data) {
-				console.log("reported");
-				console.log(data);
-			});
-		}
-	});
-
-	$(document.body).on('click', '#playCut', function(){
-		var times = [14, 123, 400];
-		var durations = [5, 5, 5];
-		videoPlayer.playTime(times, durations, 0);
-	});
-
-	$(document.body).on('click', '#editBookmarks', function(){
-		console.log("Edit mode");
-		$(this).attr("id", "doneEditingBookmarks");
-		$(this).html("&#10003;");
-		$("#bookmarks").addClass("removing");
-		editMode = true;
-	});
 
 	$(document.body).on('click', '#doneEditingBookmarks', function(){
 		editMode = false;

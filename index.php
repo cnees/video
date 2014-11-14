@@ -36,6 +36,7 @@ if ( $USER->instructor ) {
     echo("</label>\n");
     SettingsForm::end();
     //require_once "reports.php";
+    require_once "viewGraph.php";
 }
 
 ?>
@@ -49,7 +50,7 @@ if ( $USER->instructor ) {
 		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark <span id="clock">00:00</span></button>
 		<span id="bookmarks">&nbsp;</span>
 		<p>
-		<!--<p><button type="submit" id="playCut">Review Bookmarks</button></p>-->
+		<!--<p><button type="submit" id="playCut">Quick Review</button></p>-->
 		<textarea placeholder="Leave a response" id="comment"></textarea>
 		</p>
 		<button type="submit" id="submitComment">Save as Comment</button>
@@ -76,6 +77,7 @@ $OUTPUT->footerStart();
 			REPLIESCALL = "<?=addSession('fetchReplies.php')?>";
 			BOOKMARKCALL = "<?=addSession('bookmark.php')?>";
 			VIEWSCALL = "<?=addSession('views.php')?>";
+			GRAPHCALL = "<?=addSession('viewGraph.php')?>";
 			REPORTCALL = "<?=addSession('report.php')?>";
 			VIDEO_ID = "<?=Settings::linkGet('video');?>";
 			USER_ID = <?=$USER->id;?>;

@@ -67,6 +67,7 @@
 	width:220px;
 	border:1px solid #999;
 	text-align: justify;
+	background-color:#FFF;
 }
 .infobox:hover .info, .infobox:active .info{
 	display:inline-block;

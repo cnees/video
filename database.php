@@ -17,7 +17,9 @@ array( "{$CFG->dbprefix}video_comments",
   `link_id` int(11) NOT NULL,
   `parent` int(11) unsigned DEFAULT NULL,
   `replies` int(11) unsigned DEFAULT '0',
-  `reports` int(11) unsigned DEFAULT '0',
+  `reports` int(11) DEFAULT '0',
+  `private` tinyint(1) DEFAULT NULL,
+  `video_id` varchar(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`,`link_id`,`user_id`),
   KEY `video_ibfk_1` (`link_id`),
@@ -27,7 +29,7 @@ array( "{$CFG->dbprefix}video_comments",
   CONSTRAINT `video_comments_ibfk_1` FOREIGN KEY (`parent`) REFERENCES `video_comments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `video_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `lti_link` (`link_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `video_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8;"),
+) ENGINE=InnoDB AUTO_INCREMENT=285 DEFAULT CHARSET=utf8;"),
 
 array( "{$CFG->dbprefix}video_bookmarks",
 "CREATE TABLE `video_bookmarks` (
@@ -35,25 +37,26 @@ array( "{$CFG->dbprefix}video_bookmarks",
   `videoTime` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `link_id` int(11) NOT NULL,
+  `video_id` varchar(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`videoTime`,`user_id`,`link_id`),
+  UNIQUE KEY `videoTime` (`videoTime`,`user_id`,`link_id`),
   KEY `video_bookmarks_ibfk_1` (`link_id`),
   KEY `video_bookmarks_ibfk_2` (`user_id`),
   CONSTRAINT `video_bookmarks_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `lti_link` (`link_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `video_bookmarks_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8;"),
+) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=utf8;"),
 
 array( "{$CFG->dbprefix}video_views",
 "CREATE TABLE `video_views` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `videoTime` int(11) NOT NULL,
-  `views` int(11) unsigned DEFAULT 0,
+  `view_vector` varchar(300) NOT NULL,
   `link_id` int(11) NOT NULL,
+  `video_id` varchar(11) DEFAULT '',
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`videoTime`,`link_id`),
+  UNIQUE KEY `key` (`video_id`,`link_id`),
   KEY `video_views_ibfk_1` (`link_id`),
   CONSTRAINT `video_views_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `lti_link` (`link_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8;"),
+) ENGINE=InnoDB AUTO_INCREMENT=2163 DEFAULT CHARSET=utf8;"),
 
 array( "{$CFG->dbprefix}video_views_by_student",
 "CREATE TABLE `video_views_by_student` (
@@ -61,11 +64,12 @@ array( "{$CFG->dbprefix}video_views_by_student",
   `user_id` int(11) NOT NULL,
   `view_vector` varchar(300) NOT NULL,
   `link_id` int(11) NOT NULL,
+  `video_id` varchar(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`link_id`),
   KEY `video_views_by_student_ibfk_1` (`link_id`),
   CONSTRAINT `video_views_by_student_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `lti_link` (`link_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `video_views_by_student_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+) ENGINE=InnoDB AUTO_INCREMENT=2248 DEFAULT CHARSET=utf8;")
 
 );

@@ -6,7 +6,7 @@ $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'link_id'));
 
 $input_vector = $_POST['vector'];
 
-$views = $PDOX->rowDie("SELECT * FROM video_views_by_student
+$user_views = $PDOX->rowDie("SELECT * FROM video_views_by_student
 	WHERE user_id = :UID
 	AND link_id = :LID
 	LIMIT 1;",
@@ -16,15 +16,30 @@ $views = $PDOX->rowDie("SELECT * FROM video_views_by_student
 	)
 );
 
-print_r($views['view_vector']);
+$total_views = $PDOX->rowDie("SELECT * FROM video_views
+	WHERE link_id = :LID
+	LIMIT 1;",
+	array(
+		":LID" => $LINK->id
+	)
+);
 
-$views_vector = array_map("intval", explode(",", $views['view_vector']));
-$add_vector = $int_array = array_map("intval", explode(",", $input_vector));
 
-array_pad($views_vector, count($add_vector), 0);
 
-foreach ($add_vector as $i=>$i_val) {
-	$views_vector[$i] = $views_vector[$i] + $add_vector[$i];
+$user_views_vector = array_map("intval", explode(",", $user_views['view_vector']));
+$total_views_vector = array_map("intval", explode(",", $total_views['view_vector']));
+
+$add_vector = array_map("intval", explode(",", $input_vector));
+
+$user_views_vector = array_pad($user_views_vector, count($add_vector), 0);
+$total_views_vector = array_pad($total_views_vector, count($add_vector), 0);
+
+
+if(count($user_views_vector) > 1) {
+	foreach ($add_vector as $i=>$i_val) {
+		$user_views_vector[$i] = $user_views_vector[$i] + $add_vector[$i];
+		$total_views_vector[$i] = $total_views_vector[$i] + $add_vector[$i];
+	}
 }
 
 $PDOX->queryDie("INSERT INTO video_views_by_student(user_id, view_vector, link_id)
@@ -33,10 +48,20 @@ $PDOX->queryDie("INSERT INTO video_views_by_student(user_id, view_vector, link_i
 	UPDATE view_vector=:VEC",
 	array(
 		":UID" => $USER->id,
-		":VEC" => implode(",",$views_vector),
+		":VEC" => implode(",",$user_views_vector),
 		":LID" => $LINK->id
 	)
 );
 
+// TODO: Add video ID
+$PDOX->queryDie("INSERT INTO video_views(view_vector, link_id)
+	VALUES(:VEC, :LID)
+	ON DUPLICATE KEY
+	UPDATE view_vector=:VEC",
+	array(
+		":VEC" => implode(",",$total_views_vector),
+		":LID" => $LINK->id
+	)
+);
 
 ?>
