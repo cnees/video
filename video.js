@@ -67,7 +67,7 @@ var videoComments = {
 		$.getJSON(UPDATECOMMENTCALL, message, function(data) {
 			//console.log("JSON parentID: " + typeof(parentID));
 			//console.log("JSON parentID: " + parentID.toString());
-			console.log(data);
+			//console.log(data);
 			var replies = "";
 			$.each(data, function(key, val) {
 				try {
@@ -285,7 +285,7 @@ var videoBookmarks = {
 			fetch: "true"
 		};
 		$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
-			console.log(data);
+			//console.log(data);
 			var times = "";
 			$.each(data, function(key, val) {
 				times = times + "<a data-bookmark='" + val.videoTime + "' class='bookmark'>&nbsp;" + timeFormat(val.videoTime) + "&nbsp;</a>";
@@ -404,7 +404,7 @@ $(document).ready(function() {
 			replyTo: parentMessage.attr('data-id')
 		};
 		$.post(COMMENTCALL, replymessage, function(data) {
-			/*console.log(data);*/
+			//console.log(data);
 			comments.lastTime = 0;
 			videoComments.getComments();
 		});
@@ -428,7 +428,7 @@ $(document).ready(function() {
 			comment: $("#comment").val()
 		};
 		$.post(COMMENTCALL, message, function(data) {
-			console.log(data);
+			//console.log(data);
 			$("#comment").val("");
 			videoComments.lastUpdate = 0;
 			videoComments.getComments();
@@ -455,7 +455,7 @@ $(document).ready(function() {
 			var report_id = $(this).parent().parent().children('.message').attr('data-id');
 			var message = {id: report_id};
 			$.post(REPORTCALL, message, function(data) {
-				console.log(data);
+				//console.log(data);
 			});
 		}
 	});
@@ -481,7 +481,7 @@ $(document).ready(function() {
 		};
 		//console.log(message);
 		$.post(BOOKMARKCALL, message, function(data) {
-			console.log(data);
+			//console.log(data);
 		});
 		// TODO: Sort appended bookmarks by time?
 		// TODO: Prevent appending duplicate bookmarks
@@ -496,7 +496,7 @@ $(document).ready(function() {
 				forget: $(this).attr("data-bookmark")
 			};
 			$.post(BOOKMARKCALL, message, function(data) {
-				console.log(data);
+				//console.log(data);
 			});
 			$(this).remove();
 		}
@@ -527,7 +527,7 @@ $(document).ready(function() {
 			video_id: $("input[name='video']").val()
 		};
 		$.post(ADDVIDEOCALL, message, function(data){
-			console.log(data);
+			//console.log(data);
 		});
 	});
 
