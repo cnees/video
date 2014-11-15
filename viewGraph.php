@@ -1,48 +1,25 @@
 <?php
+require_once "../../config.php";
+require_once $CFG->dirroot."/pdo.php";
+// Sanity checks
+$LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'link_id'));
+
+	use \Tsugi\Core\Settings;
+	if(isset($_GET['video_id'])){
+		$video_id = $_GET['video_id'];
+	}
+	else {
+		$video_id = Settings::linkGet('video');
+	}
 	$total_views = $PDOX->rowDie("SELECT * FROM video_views
 		WHERE link_id = :LID
+		AND video_id = :VID
 		LIMIT 1;",
 		array(
-			":LID" => $LINK->id
+			":LID" => $LINK->id,
+			":VID" => $video_id
 		)
 	);
-	$total_views_vector = array_map("intval", explode(",", $total_views['view_vector']));
-
-	$view_array_string = "";
-	//echo "Count: " + count($comments);
-	foreach($total_views_vector as $views) {
-		$view_array_string .= "[''," . $views . "],";
-	}
+	//$total_views_vector = array_map("intval", explode(",", $total_views['view_vector']));
+	echo $total_views['view_vector'];
 ?>
-<html>
-  <head>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-google.setOnLoadCallback(drawChart);
-function drawChart() {
-
-  var data = google.visualization.arrayToDataTable([
-    ['Time', 'Views'],
-    <?=$view_array_string?>
-  ]);
-
-  var options = {
-    title: 'Views over Video Time',
-    hAxis: {title: 'Time'},
-    vAxis: {title: 'Views'},
-    legend: 'none'
-  };
-
-  var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-
-  chart.draw(data, options);
-
-}
-    </script>
-  </head>
-  <body>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
-  </body>
-</html>
-

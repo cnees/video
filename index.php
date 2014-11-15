@@ -24,19 +24,7 @@ $OUTPUT->header();
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
 if ( $USER->instructor ) {
-	echo "<p style='text-align:right;'>";
-    SettingsForm::button(false);
-    echo "</p>";
-    SettingsForm::start();
-?>
-<label for="video">
-            Please select a YouTube video.<br/>
-<?php
-    SettingsForm::text('video');
-    echo("</label>\n");
-    SettingsForm::end();
-    //require_once "reports.php";
-    require_once "viewGraph.php";
+	require_once "instructor.php";
 }
 
 ?>
@@ -47,10 +35,12 @@ if ( $USER->instructor ) {
 		</div>
 		<br>
 		<!--<p><button type="submit" id="sendData">Send View stats</button></p>-->
-		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark <span id="clock">00:00</span></button>
+		<button type="submit" id="toggleGraph"><span class="glyphicon glyphicon-signal"></span></button>
+		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark<!--<span id="clock">00:00</span>--></button>
 		<span id="bookmarks">&nbsp;</span>
 		<p>
 		<!--<p><button type="submit" id="playCut">Quick Review</button></p>-->
+		<div id="chartWrapper" style="display:none"><div id="chart_div" style="width: 900px; height: 500px;">Loading View Stats</div></div>
 		<textarea placeholder="Leave a response" id="comment"></textarea>
 		</p>
 		<button type="submit" id="submitComment">Save as Comment</button>
@@ -69,7 +59,9 @@ if ( $USER->instructor ) {
 <?php
 $OUTPUT->footerStart();
 ?>
+		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script>
+
             // Javascript at the end to speed loading
 			COMMENTCALL = "<?=addSession('comment.php')?>";
 			UPDATECOMMENTCALL = "<?=addSession('updateComments.php')?>";
@@ -78,10 +70,12 @@ $OUTPUT->footerStart();
 			BOOKMARKCALL = "<?=addSession('bookmark.php')?>";
 			VIEWSCALL = "<?=addSession('views.php')?>";
 			GRAPHCALL = "<?=addSession('viewGraph.php')?>";
+			ADDVIDEOCALL = "<?=addSession('addVideo.php')?>";
 			REPORTCALL = "<?=addSession('report.php')?>";
 			VIDEO_ID = "<?=Settings::linkGet('video');?>";
 			USER_ID = <?=$USER->id;?>;
 		</script>
 		<script src="video.js?v=<?=rand()?>"></script>
+
 <?php
 $OUTPUT->footerEnd();

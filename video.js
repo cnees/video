@@ -1,3 +1,36 @@
+
+var videoChart = {
+	enabled: false,
+	toggleGraph: function() {
+		this.enabled = !this.enabled;
+		if(this.enabled) videoChart.drawChart();
+		$('#chartWrapper').toggle();
+	},
+	drawChart: function() {
+		if(!this.enabled) return;
+		var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+		var graphData = [['% Video Time', 'Views']];
+		$.get(GRAPHCALL, {video_id: VIDEO_ID}, function(functionData) {
+			var split = functionData.split(",");
+			for(var i = 0; i < split.length; i++) {
+				thing = ['', parseInt(split[i])];
+				graphData.push(thing);
+			}
+			var options = {
+				title: 'Views over Video Time',
+				hAxis: {title: 'Time'},
+				vAxis: {title: 'Views'},
+				legend: 'none'
+			};
+			chart.draw(google.visualization.arrayToDataTable(graphData), options);
+		});
+	}
+}
+
+google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(videoChart.drawChart);
+
+
 function onYouTubeIframeAPIReady() {videoPlayer.createPlayer();}
 
 function onPlayerReady(event) {videoPlayer.playerReady(event);}
@@ -34,7 +67,7 @@ var videoComments = {
 		$.getJSON(UPDATECOMMENTCALL, message, function(data) {
 			//console.log("JSON parentID: " + typeof(parentID));
 			//console.log("JSON parentID: " + parentID.toString());
-			//console.log(data);
+			console.log(data);
 			var replies = "";
 			$.each(data, function(key, val) {
 				try {
@@ -100,6 +133,7 @@ var videoComments = {
 
 	display: function() {
 		var currentTime = videoPlayer.player.getCurrentTime();
+		//$("#clock").html(timeFormat(currentTime));
 		if(currentTime >= Math.floor(videoComments.lastUpdate)) {
 			for(i = Math.floor(videoComments.lastUpdate); i <= currentTime; i++) {
 				$("[data-time='" + i + "']").removeClass("inactive").addClass("active");
@@ -131,7 +165,8 @@ var videoPlayer = {
 
 	playerReady: function(event) {
 		this.player.playVideo();
-		videoComments.setUpdateInterval(1);
+		videoComments.getComments();
+		videoComments.setUpdateInterval(0.1);
 		videoViews.initialize();
 		videoViews.setUpdateInterval();
 		// Every second, check which comments to make black or gray
@@ -237,10 +272,10 @@ var videoViews = {
 		var i = this.bins.length - 1;
 		while(i >= 0) this.bins[i--] = 0;
 		//this.bins.map(function(){return 0;}); // Reset views to zero after adding them to the database
-		var message = {};
-		$.get(GRAPHCALL, message, function(data){
-			//console.log(data);
-		});
+		var message = {
+			video_id: VIDEO_ID
+		};
+		videoChart.drawChart();
 	}
 }
 
@@ -250,7 +285,7 @@ var videoBookmarks = {
 			fetch: "true"
 		};
 		$.getJSON(BOOKMARKCALL, getBookmarksMessage, function(data) {
-			//console.log(data);
+			console.log(data);
 			var times = "";
 			$.each(data, function(key, val) {
 				times = times + "<a data-bookmark='" + val.videoTime + "' class='bookmark'>&nbsp;" + timeFormat(val.videoTime) + "&nbsp;</a>";
@@ -289,8 +324,8 @@ var videoFormActions = {
 }
 		
 $(document).ready(function() {
+
 	videoPlayer.loadAPI();
-	videoComments.getComments();
 	videoBookmarks.getBookmarks();
 
 	$(document.body).on('click', '.message.editable', function(event){
@@ -341,7 +376,7 @@ $(document).ready(function() {
 			$(this).parent().parent().children('.replying').removeClass('replying');
 		}
 	});
-
+	
 	$('div').on('click', '.cancelReply', function(event) {
 		$(this).parent().parent().children('.replying').removeClass('replying');
 		$(this).parent().remove();
@@ -393,7 +428,7 @@ $(document).ready(function() {
 			comment: $("#comment").val()
 		};
 		$.post(COMMENTCALL, message, function(data) {
-			/*console.log(data);*/
+			console.log(data);
 			$("#comment").val("");
 			videoComments.lastUpdate = 0;
 			videoComments.getComments();
@@ -420,7 +455,7 @@ $(document).ready(function() {
 			var report_id = $(this).parent().parent().children('.message').attr('data-id');
 			var message = {id: report_id};
 			$.post(REPORTCALL, message, function(data) {
-				//console.log(data);
+				console.log(data);
 			});
 		}
 	});
@@ -446,7 +481,7 @@ $(document).ready(function() {
 		};
 		//console.log(message);
 		$.post(BOOKMARKCALL, message, function(data) {
-			//console.log(data);
+			console.log(data);
 		});
 		// TODO: Sort appended bookmarks by time?
 		// TODO: Prevent appending duplicate bookmarks
@@ -461,7 +496,7 @@ $(document).ready(function() {
 				forget: $(this).attr("data-bookmark")
 			};
 			$.post(BOOKMARKCALL, message, function(data) {
-				//console.log(data);
+				console.log(data);
 			});
 			$(this).remove();
 		}
@@ -482,4 +517,18 @@ $(document).ready(function() {
 	$('#sendData').click(function() {
 		videoViews.sendToDB();
 	});
+
+	$("#toggleGraph").click(function(){
+		videoChart.toggleGraph();
+	});
+
+	$(document.body).on('click', '#settings_save', function(){
+		var message = {
+			video_id: $("input[name='video']").val()
+		};
+		$.post(ADDVIDEOCALL, message, function(data){
+			console.log(data);
+		});
+	});
+
 });
