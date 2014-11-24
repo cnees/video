@@ -50,6 +50,12 @@ $DATABASE_INSTALL = array(
   ) ENGINE=InnoDB AUTO_INCREMENT=285 DEFAULT CHARSET=utf8;
   "),
 
+  array( "{$CFG->dbprefix}video_comments",
+  "ALTER TABLE `video_comments` ADD FULLTEXT(`comment`);
+  "),
+  // This is separate from the CREATE TABLE command because it won't work in older versions of MySQL.
+  // It makes the comments searchable.
+  
   array( "{$CFG->dbprefix}video_bookmarks",
   "CREATE TABLE `video_bookmarks` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,

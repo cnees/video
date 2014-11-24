@@ -9,9 +9,9 @@ use \Tsugi\UI\SettingsForm;
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id'));
 
-// Handle the incoming post
+// Handle the incoming 2st
 if ( SettingsForm::handleSettingsPost() ) {
-    header( 'Location: '.addSession('index.php') ) ;
+    header('Location: '.addSession('index.php') ) ;
     return;
 }
 
@@ -52,7 +52,11 @@ if ( $USER->instructor ) {
 		<div id="submitStatus">&nbsp;</div>
 	</div>
 	<div class="col-xs-12 col-md-12">
-		<div id="commentsSection">Replies</div>
+		<div id="commentsSection">
+			<span style="font-size:18px;">Replies</span>
+			<span id="searchButton" class="glyphicon glyphicon-search" style="float:right;margin:5px;font-size:12px"></span><input id="search" placeholder="Search Replies" class="form-control" style="width:200px;display:inline;padding:5px;float:right;height:25px;">
+			<div id="searchResults" style="display:none;"></div>
+		</div>
 		<div id="comments">&nbsp;</div> 
 	</div>
 </div>

@@ -79,7 +79,6 @@
 }
 .submitReply, .cancelReply {font-size: 12px;}
 #commentsSection{
-	font-size:18px!important;
 	background:#ddd;
 	padding:5px;
 	margin:0px;
@@ -92,6 +91,8 @@
 	color:#f00!important;
 	text-decoration:line-through!important;
 }
+.glyphicon-search:hover, #hideSearchResults:hover{color:#FFF;text-shadow:0 0 5px #000;}
+.glyphicon-search:active, ##hideSearchResults:active{color:#000;}
 span.reply_info {
 	font-size:12px;
 	display:block;
