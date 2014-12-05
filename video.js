@@ -171,6 +171,7 @@ var videoPlayer = {
 		videoComments.getComments();
 		videoComments.setUpdateInterval(0.1);
 		videoViews.initialize();
+		videoBookmarks.initializeSlider();
 		videoViews.setUpdateInterval();
 		// Every second, check which comments to make black or gray
 	},
@@ -199,8 +200,11 @@ var videoPlayer = {
 	},
 
 	playTime: function(cut, duration) {
+		console.log(cut);
+		console.log(duration);
 		videoPlayer.player.playVideo();
 		videoPlayer.player.seekTo(cut[0]);
+		console.log("Playing " + cut[0] + " for duration " + duration[0]*1000)
 		setTimeout(
 			function() {videoPlayer.playTimes(cut, duration, 0);},
 			duration[0]*1000
@@ -208,16 +212,19 @@ var videoPlayer = {
 	},
 
 	playTimes: function(cut, duration, i) {
+		console.log("Called playTimes");
 		// Don't access this function directly. Use videoPlayer.playTime instead.
 		var offset = cut[i] + duration[i] - videoPlayer.player.getCurrentTime();
-		if(offset > 0) { // Check that player has reached end of interval
+		/*if(offset > 0) { // Check that player has reached end of interval
+			console.log("Delaying");
 			setTimeout( // Delay until end of interval
 				function() {videoPlayer.playTimes(cut, duration, i);},
 				offset*1000
 			);
 		}
-		else if(i < cut.length) {
+		else */if(i < cut.length) {
 			// Start next interval
+			console.log("Starting new interval");
 			++i;
 			videoPlayer.player.seekTo(cut[i]);
 			setTimeout(
@@ -226,6 +233,7 @@ var videoPlayer = {
 			);
 		}
 		else {
+			console.log("Pausing");
 			videoPlayer.player.pauseVideo();
 		}
 	}
@@ -283,6 +291,34 @@ var videoViews = {
 }
 
 var videoBookmarks = {
+
+	newSlider: function() {
+		// returns a sortable DOM object with a slider inside
+		var videoLength = videoPlayer.player.getDuration();
+		var sliderString = "<div class='slider'></div>";
+		var sliderElt = $(sliderString);
+		sliderElt = sliderElt.slider({
+			range:true,
+			max: videoLength,
+			values: [0, videoLength],
+			change: function(event, ui) {
+				var listItem = $(this).parent();
+				listItem.attr('data-start', ui.values[0]);
+				listItem.attr('data-duration', ui.values[1] - ui.values[0]);
+				console.log($("#cuts").sortable("toArray", {attribute: "data-start"}));
+				console.log($("#cuts").sortable("toArray", {attribute: "data-duration"}));
+			}
+		});
+		var listItem = $("<li data-start='0' data-duration='" + videoLength + "'><div class='options'><span class='glyphicon glyphicon-remove'></span><span class='glyphicon glyphicon-plus'></span></div></li>");
+		listItem.append(sliderElt);
+		return listItem;
+	},
+
+	initializeSlider: function() { // Only initialize this after the player is ready.
+		$("#cuts").sortable();
+		$("#cuts").append(videoBookmarks.newSlider());
+	},
+
 	getBookmarks: function () {
 		var getBookmarksMessage = {
 			fetch: "true"
@@ -351,6 +387,7 @@ $(document).ready(function() {
 	videoPlayer.loadAPI();
 	videoBookmarks.getBookmarks();
 	
+
 	$('#search').submit(function(){
 		videoFormActions.search();
 	});
@@ -495,8 +532,10 @@ $(document).ready(function() {
 	});
 
 	$(document.body).on('click', '#playCut', function(){
-		var times = [103, 153, 432, 597, 755, 779, 997, 1004];
-		var durations = [13, 4, 5, 3, 13, 18, 4, 0];
+		var times = $("#cuts").sortable("toArray", {attribute: "data-start"});
+		var durations = $("#cuts").sortable("toArray", {attribute: "data-duration"});
+		times.push(0);
+		durations.push(0);
 		videoPlayer.playTime(times, durations, 0);
 	});
 
@@ -540,6 +579,10 @@ $(document).ready(function() {
 		}
 	});
 
+	$(document.body).on('click', '.glyphicon-plus', function() {
+		var newSlider = "<li><div class='options'><span class='glyphicon glyphicon-remove'></span><span class='glyphicon glyphicon-plus'></span></div><div class='slider'></div></li>";
+		$(this).parent().parent().parent().append(videoBookmarks.newSlider());
+	});
 
 	$(document.body).on('click', '#doneEditingBookmarks', function(){
 		editMode = false;
