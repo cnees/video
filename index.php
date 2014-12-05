@@ -35,10 +35,27 @@ if ( $USER->instructor ) {
 		</div>
 		<br>
 		
-		<ul id="cuts">
-		</ul>
+		
+		<div style="width:100%;text-align:center;">
+			<button style="width:25%;box-style:border-box;margin:0px;" id="commentsTab"><span class="glyphicon btn-lg glyphicon-comment"></span></button><button
+					style="width:25%;box-style:border-box;margin:0px;" id="bookmarksTab"><span class="glyphicon btn-lg glyphicon-bookmark"></span></button><button
+					style="width:25%;box-style:border-box;margin:0px;" id="cutsTab"><span class="glyphicon btn-lg glyphicon-film"></span></button><button
+					style="width:25%;box-style:border-box;margin:0px;" id="graphTab"><span class="glyphicon btn-lg glyphicon-signal"></span></button>
+		</div>
+
+		<div id="bookmarksSection">
+			
+		</div>
+
+		<div id="graphSection">
+			<!--<p><button type="submit" id="sendData">Send View stats</button></p>-->
+			
+		</div>
+
+
 		<br>
-		<!--<p><button type="submit" id="sendData">Send View stats</button></p>-->
+		
+		<br>
 		<button type="submit" id="toggleGraph"><span class="glyphicon glyphicon-signal"></span></button>
 		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark<!--<span id="clock">00:00</span>--></button>
 		<span id="bookmarks">&nbsp;</span>
@@ -53,13 +70,19 @@ if ( $USER->instructor ) {
 			<span class="glyphicon glyphicon-question-sign info" style="color:#ccc;"></span>
 			<span class="info">Comments are visible to anyone logged in. Your notes are only visible to you and your class administrators.</span>
 		</div>
-		<div id="submitStatus">&nbsp;</div>
 	</div>
 	<div class="col-xs-12 col-md-12">
-		<div id="commentsSection">Replies</div>
+		<br>
+		<div id="commentsHeader">Replies</div>
 		<div id="comments">&nbsp;</div> 
 	</div>
 </div>
+
+
+
+
+
+
 <?php
 $OUTPUT->footerStart();
 ?>

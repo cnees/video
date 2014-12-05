@@ -201,7 +201,6 @@ var videoPlayer = {
 		console.log(duration);
 		videoPlayer.player.playVideo();
 		videoPlayer.player.seekTo(cut[0]);
-		console.log("Playing " + cut[0] + " for duration " + duration[0]*1000)
 		setTimeout(
 			function() {videoPlayer.playTimes(cut, duration, 0);},
 			duration[0]*1000
@@ -223,11 +222,16 @@ var videoPlayer = {
 			// Start next interval
 			console.log("Starting new interval");
 			++i;
-			videoPlayer.player.seekTo(cut[i]);
-			setTimeout(
-				function() {videoPlayer.playTimes(cut, duration, i);},
-				duration[i]*1000
-			);
+			if(duration[i] === -1) {
+				videoPlayer.player.pauseVideo();
+			}
+			else {
+				videoPlayer.player.seekTo(cut[i]);
+				setTimeout(
+					function() {videoPlayer.playTimes(cut, duration, i);},
+					duration[i]*1000
+				);
+			}
 		}
 		else {
 			console.log("Pausing");
@@ -363,9 +367,6 @@ $(document).ready(function() {
 
 	videoPlayer.loadAPI();
 	videoBookmarks.getBookmarks();
-<<<<<<< HEAD
-=======
-	
 
 	$('#search').submit(function(){
 		videoFormActions.search();
@@ -380,7 +381,6 @@ $(document).ready(function() {
 	$('#searchButton').click(function(){
 		videoFormActions.search();
 	});
->>>>>>> fc11c04... Added sliders for custom cuts
 
 	$(document.body).on('click', '.message.editable', function(event){
 		videoPlayer.player.pauseVideo();
@@ -518,7 +518,7 @@ $(document).ready(function() {
 		var times = $("#cuts").sortable("toArray", {attribute: "data-start"});
 		var durations = $("#cuts").sortable("toArray", {attribute: "data-duration"});
 		times.push(0);
-		durations.push(0);
+		durations.push(-1);
 		videoPlayer.playTime(times, durations, 0);
 	});
 
@@ -567,6 +567,11 @@ $(document).ready(function() {
 		$(this).parent().parent().parent().append(videoBookmarks.newSlider());
 	});
 
+	$(document.body).on('click', '.glyphicon-plus', function() {
+		var newSlider = "<li><div class='options'><span class='glyphicon glyphicon-remove'></span><span class='glyphicon glyphicon-plus'></span></div><div class='slider'></div></li>";
+		$(this).parent().parent().parent().append(videoBookmarks.newSlider());
+	});
+
 	$(document.body).on('click', '#doneEditingBookmarks', function(){
 		editMode = false;
 		$(this).html("X");
@@ -578,7 +583,7 @@ $(document).ready(function() {
 		videoViews.sendToDB();
 	});
 
-	$("#toggleGraph").click(function(){
+	$("#graphSection").click(function(){
 		videoChart.toggleGraph();
 	});
 

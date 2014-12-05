@@ -81,7 +81,7 @@
     box-shadow:0 0 5px #9ecaed;
 }
 .submitReply, .cancelReply {font-size: 12px;}
-#commentsSection{
+#commentsHeader{
 	font-size:18px!important;
 	background:#ddd;
 	padding:5px;
@@ -95,11 +95,10 @@
 	color:#f00!important;
 	text-decoration:line-through!important;
 }
-<<<<<<< HEAD
-=======
+
 .glyphicon-search:hover, #hideSearchResults:hover{color:#FFF;text-shadow:0 0 5px #000;}
 .glyphicon-search:active, #hideSearchResults:active{color:#000;}
->>>>>>> fc11c04... Added sliders for custom cuts
+
 span.reply_info {
 	font-size:12px;
 	display:block;
