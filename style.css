@@ -81,8 +81,8 @@
     box-shadow:0 0 5px #9ecaed;
 }
 .submitReply, .cancelReply {font-size: 12px;}
-#commentsHeader{
-	font-size:18px!important;
+
+#commentsSection{
 	background:#ddd;
 	padding:5px;
 	margin:0px;

@@ -30,7 +30,6 @@ var videoChart = {
 google.load("visualization", "1", {packages:["corechart"]});
 google.setOnLoadCallback(videoChart.drawChart);
 
-
 function onYouTubeIframeAPIReady() {videoPlayer.createPlayer();}
 
 function onPlayerReady(event) {videoPlayer.playerReady(event);}
@@ -58,60 +57,64 @@ function timeFormat(seconds) {
 }
 
 var videoComments = {
+	parseComment: function(val, parentID){
+		var replies = "";
+		try {
+			var currentTime = videoPlayer.player.getCurrentTime();
+		}
+		catch(e) {
+			var currentTime = 0;
+		}
+		var active = "inactive";
+		var displayMode = "block";
+		if(val.videoTime <= currentTime) {
+			active = "active";
+		}
+		if(parentID != -1) {
+			displayMode = "hidden";
+		}
+		replies = replies + "<div class='comment " + active + "' style='display:" + displayMode + "' data-time='" + val.videoTime + "'>";
+		replies = replies + "<span class='reply_info'>";
+		replies = replies + ((val.private != 0)? "Note" : ("Posted by " + val.displayname));
+		replies = replies + " at <a data-bookmark='" + val.videoTime + "' class='bookmark'>" + timeFormat(val.videoTime) + "</a>";
+		if(val.replies > 0) {
+			replies = replies + " | <a class='view_replies load_replies'>" + val.replies;
+			if(val.replies > 1) replies = replies + " replies"; // plural
+			else replies = replies + " reply"; // singular
+			replies = replies + "</a>";
+		}
+		replies = replies + "</span>";
+		replies = replies + "<span style='float:right'><a class='reply' data-id='" + val.id + "'>Contribute</a> | <a class='report' data-id='" + val.id + "'>Report</a></span>";
+		var truefalse = (val.user_id === USER_ID.toString())?"true":"false";
+		var editable = "";
+		if(val.user_id === USER_ID.toString()) {
+			editable = " editable";
+		}
+		replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
+		return replies;
+	},
+
 	// TODO: Scroll to newest comments
 	getComments: function (parentID) {
+		
 		if(typeof(parentID)==='undefined') parentID = -1;
-		var message = {
-			parentMessageID: parentID
-		};
+		
+		var message = {parentMessageID: parentID};
+		
 		$.getJSON(UPDATECOMMENTCALL, message, function(data) {
-			//console.log("JSON parentID: " + typeof(parentID));
-			//console.log("JSON parentID: " + parentID.toString());
-			//console.log(data);
+		
 			var replies = "";
+
 			$.each(data, function(key, val) {
-				try {
-					var currentTime = videoPlayer.player.getCurrentTime();
-				}
-				catch(e) {
-					var currentTime = 0;
-				}
-				var active = "inactive";
-				var displayMode = "block";
-				if(val.videoTime <= currentTime) {
-					active = "active";
-				}
-				if(parentID != -1) {
-					displayMode = "hidden";
-				}
-				replies = replies + "<div class='comment " + active + "' style='display:" + displayMode + "' data-time='" + val.videoTime + "'>";
-				replies = replies + "<span class='reply_info'>";
-				replies = replies + ((val.private != 0)? "Note" : ("Posted by " + val.displayname));
-				replies = replies + " at " + timeFormat(val.videoTime);
-				if(val.replies > 0) {
-					replies = replies + " | <a class='view_replies load_replies'>" + val.replies;
-					if(val.replies > 1) replies = replies + " replies"; // plural
-					else replies = replies + " reply"; // singular
-					replies = replies + "</a>";
-				}
-				replies = replies + "</span>";
-				replies = replies + "<span style='float:right'><a class='reply' data-id='" + val.id + "'>Contribute</a> | <a class='report' data-id='" + val.id + "'>Report</a></span>";
-				var truefalse = (val.user_id === USER_ID.toString())?"true":"false";
-				var editable = "";
-				if(val.user_id === USER_ID.toString()) {
-					editable = " editable";
-				}
-				replies = replies + "<br><div contenteditable='" + truefalse + "' class='message" + editable + "' data-id='" + val.id + "'>" + val.comment + "</div></div>\n";
+				replies += videoComments.parseComment(val, parentID);
 			});
-			if(parentID == -1) {
-				$("#comments").html(replies);
-			}
-			else {
+		
+			if(parentID == -1) $("#comments").html(replies); // All comments
+			else { // All replies to a comment
 				replies = "<div class='contributions'>" + replies + "</div>";
-				//console.log($(".message[data-id=" + parentID + "]").html());
 				$(".message[data-id=" + parentID + "]").parent().append(replies);
-				//console.log("Appending replies: " + replies);
 			}
+
 			videoComments.display();
 		});
 	},
@@ -360,6 +363,26 @@ var videoFormActions = {
 		});
 		comments.lastTime = 0;
 		videoComments.getComments();
+	},
+	search: function() {
+		var searchInput = $("#search");
+		var query = searchInput.val();
+		$("#search").val("");
+		var message = {
+			search: query
+		};
+		console.log(query);
+		$.getJSON(UPDATECOMMENTCALL, message, function(data) {
+			console.log(data);
+			var hits = "";
+			$.each(data, function(key, val) {
+				hits += videoComments.parseComment(val);
+			});
+			if(hits === "") hits = "No hits";
+			hits = "<span class='glyphicon glyphicon-remove' style='float:right' id='hideSearchResults'></span><br>" + hits;
+			$('#searchResults').html(hits);
+			$('#searchResults').show();
+		});
 	}
 }
 		
@@ -367,6 +390,20 @@ $(document).ready(function() {
 
 	videoPlayer.loadAPI();
 	videoBookmarks.getBookmarks();
+	
+	$('#search').submit(function(){
+		videoFormActions.search();
+	});
+
+	$('#search').keypress(function (event) {
+        if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) {
+        	videoFormActions.search();
+        }
+    });
+
+	$('#searchButton').click(function(){
+		videoFormActions.search();
+	});
 
 	$('#search').submit(function(){
 		videoFormActions.search();
@@ -416,13 +453,13 @@ $(document).ready(function() {
 	});
 
 	$('div').on('click', '.reply', function(event) {
-		// TODO: Clear text from reply box and scroll to comment on submit
+		// TODO: Scroll to comment on submit
 		event.stopPropagation();
 		videoPlayer.player.pauseVideo();
 		var message = $(this).parent().parent().children('.message');
 		if(!message.hasClass("replying")){
 			var buttons = "<button class='submitReply'>Submit</button> <button class='cancelReply'>Cancel</button>\n";
-			$(this).parent().parent().append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
+			$(this).parent().parent(3).append("<div class='replyContainer'><div class='replyBox' contenteditable='true'></div>" + buttons + "</div>");
 			message.addClass('replying');
 		}
 		else {
@@ -451,19 +488,16 @@ $(document).ready(function() {
 	$('div').on('click', '.submitReply', function(event) {
 		event.stopPropagation();
 		var parentMessage = $(this).parent().parent().children('.replying');
-		//console.log("Posting reply: " + $(this).parent().children('.replyBox').html());
 		var replymessage = {
 			time: Math.floor(videoPlayer.player.getCurrentTime()),
 			comment: $(this).parent().children('.replyBox').html(),
 			replyTo: parentMessage.attr('data-id')
 		};
 		$.post(COMMENTCALL, replymessage, function(data) {
-			//console.log(data);
 			comments.lastTime = 0;
 			videoComments.getComments();
 		});
 		parentMessage.removeClass('replying');
-		//console.log("Replied to message " + parentMessage.attr('data-id'));
 	});
 
 	$(document.body).on('click', '.cancel', function(event) {
@@ -594,6 +628,10 @@ $(document).ready(function() {
 		$.post(ADDVIDEOCALL, message, function(data){
 			//console.log(data);
 		});
+	});
+
+	$(document.body).on('click', "#hideSearchResults", function(){
+		$("#searchResults").hide();
 	});
 
 });
