@@ -25,6 +25,9 @@
 	overflow:auto;
 	resize:vertical;
 }
+#cuts {
+	width:100%;padding:10px;
+}
 .comment {
 	padding-top:5px;
 	padding-left:5px;
@@ -92,10 +95,55 @@
 	color:#f00!important;
 	text-decoration:line-through!important;
 }
+<<<<<<< HEAD
+=======
+.glyphicon-search:hover, #hideSearchResults:hover{color:#FFF;text-shadow:0 0 5px #000;}
+.glyphicon-search:active, #hideSearchResults:active{color:#000;}
+>>>>>>> fc11c04... Added sliders for custom cuts
 span.reply_info {
 	font-size:12px;
 	display:block;
 	float:left;
+}
+.ui-slider-handle {
+	outline:none!important;
+}
+.slider .ui-slider-range {
+	background: #CB181E;
+}
+.slider {
+	margin-top:10px;
+	margin-bottom: 10px;
+	background:#777;
+}
+#cuts {
+	list-style: none;
+}
+#cuts li {
+	height:30px;
+	border-top:1px solid #fff;
+	border-bottom:1px solid #fff;
+	transition:border 1s;
+	margin-bottom:1px;
+}
+#cuts li:hover {
+	border-top:1px solid #777;
+	border-bottom:1px solid #777;
+	cursor:move;
+	transition:border 1s;
+}
+#cuts .options{
+	float:right;
+	height:30px;
+	vertical-align: middle;
+	margin-right:-30px;
+	height:100%;
+}
+#cuts .options span {
+	vertical-align: middle;
+}
+.slider:hover{
+	cursor:ew-resize!important;
 }
 div.modify, .reply, .report{
 	font-size:12px;

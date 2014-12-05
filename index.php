@@ -34,12 +34,16 @@ if ( $USER->instructor ) {
 			<div id="player">&nbsp;</div>
 		</div>
 		<br>
+		
+		<ul id="cuts">
+		</ul>
+		<br>
 		<!--<p><button type="submit" id="sendData">Send View stats</button></p>-->
 		<button type="submit" id="toggleGraph"><span class="glyphicon glyphicon-signal"></span></button>
 		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark<!--<span id="clock">00:00</span>--></button>
 		<span id="bookmarks">&nbsp;</span>
 		<p>
-		<!--<p><button type="submit" id="playCut">Quick Review</button></p>-->
+		<p><button type="submit" id="playCut">Quick Review</button></p>
 		<div id="chartWrapper" style="display:none"><div id="chart_div" style="width: 900px; height: 500px;">Loading View Stats</div></div>
 		<textarea placeholder="Leave a response" id="comment"></textarea>
 		</p>
@@ -60,6 +64,7 @@ if ( $USER->instructor ) {
 $OUTPUT->footerStart();
 ?>
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script src="jquery-ui-1.11.2.custom/jquery-ui.min.js?v=<?=rand()?>"></script>
 		<script>
 
             // Javascript at the end to speed loading
