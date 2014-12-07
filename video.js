@@ -254,6 +254,8 @@ var videoViews = {
 			this.updateInterval = setInterval(function() {videoViews.updateViews();}, this.interval * 1000);
 		}
 	},
+
+
 	unsetUpdateInterval: function() {
 		clearInterval(this.updateInterval);
 		this.updateInterval = null;
@@ -313,12 +315,13 @@ var videoBookmarks = {
 				console.log($("#cuts").sortable("toArray", {attribute: "data-duration"}));
 			}
 		});
-		var listItem = $("<li data-start='0' data-duration='" + videoLength + "'><div class='options'><span class='glyphicon glyphicon-remove'></span><span class='glyphicon glyphicon-plus'></span></div></li>");
-		listItem.append(sliderElt);
+		var listItem = $("<li data-start='0' data-duration='" + videoLength + "'><br><div class='options'><button class='glyphicon glyphicon-remove'></button> <button class='glyphicon glyphicon-plus'></button></div></li>");
+		listItem.prepend(sliderElt);
 		return listItem;
 	},
 
 	initializeSlider: function() { // Only initialize this after the player is ready.
+		console.log("Initializing slider");
 		$("#cuts").sortable();
 		$("#cuts").append(videoBookmarks.newSlider());
 	},
@@ -391,6 +394,31 @@ $(document).ready(function() {
 	videoPlayer.loadAPI();
 	videoBookmarks.getBookmarks();
 	
+	$("#commentsTab").click(function(){
+		$("#commentsSection").show();
+		$("#bookmarksSection").hide();
+		$("#cutsSection").hide();
+		$("#graphSection").hide();
+	});	
+	$("#bookmarksTab").click(function(){
+		$("#commentsSection").hide();
+		$("#bookmarksSection").show();
+		$("#cutsSection").hide();
+		$("#graphSection").hide();
+	});	
+	$("#cutsTab").click(function(){
+		$("#commentsSection").hide();
+		$("#bookmarksSection").hide();
+		$("#cutsSection").show();
+		$("#graphSection").hide();
+	});	
+	$("#graphTab").click(function(){
+		$("#commentsSection").hide();
+		$("#bookmarksSection").hide();
+		$("#cutsSection").hide();
+		$("#graphSection").show();
+	});
+
 	$('#search').submit(function(){
 		videoFormActions.search();
 	});
@@ -548,7 +576,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$(document.body).on('click', '#playCut', function(){
+	$(document.body).on('click', '#playCuts', function(){
 		var times = $("#cuts").sortable("toArray", {attribute: "data-start"});
 		var durations = $("#cuts").sortable("toArray", {attribute: "data-duration"});
 		times.push(0);
@@ -596,14 +624,14 @@ $(document).ready(function() {
 		}
 	});
 
-	$(document.body).on('click', '.glyphicon-plus', function() {
-		var newSlider = "<li><div class='options'><span class='glyphicon glyphicon-remove'></span><span class='glyphicon glyphicon-plus'></span></div><div class='slider'></div></li>";
-		$(this).parent().parent().parent().append(videoBookmarks.newSlider());
+	$(document.body).on('click', '.options .glyphicon-plus', function() {
+		$(this).parent().parent().after(videoBookmarks.newSlider());
 	});
 
-	$(document.body).on('click', '.glyphicon-plus', function() {
-		var newSlider = "<li><div class='options'><span class='glyphicon glyphicon-remove'></span><span class='glyphicon glyphicon-plus'></span></div><div class='slider'></div></li>";
-		$(this).parent().parent().parent().append(videoBookmarks.newSlider());
+	$(document.body).on('click', '.options .glyphicon-remove', function() {
+		if($(this).parent().parent().siblings("li").size() >= 1) {
+			$(this).parent().parent().remove();
+		}
 	});
 
 	$(document.body).on('click', '#doneEditingBookmarks', function(){
@@ -617,7 +645,7 @@ $(document).ready(function() {
 		videoViews.sendToDB();
 	});
 
-	$("#graphSection").click(function(){
+	$("#graphTab").click(function(){
 		videoChart.toggleGraph();
 	});
 

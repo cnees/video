@@ -34,50 +34,50 @@ if ( $USER->instructor ) {
 			<div id="player">&nbsp;</div>
 		</div>
 		<br>
-		
-		
+				
 		<div style="width:100%;text-align:center;">
 			<button style="width:25%;box-style:border-box;margin:0px;" id="commentsTab"><span class="glyphicon btn-lg glyphicon-comment"></span></button><button
 					style="width:25%;box-style:border-box;margin:0px;" id="bookmarksTab"><span class="glyphicon btn-lg glyphicon-bookmark"></span></button><button
 					style="width:25%;box-style:border-box;margin:0px;" id="cutsTab"><span class="glyphicon btn-lg glyphicon-film"></span></button><button
 					style="width:25%;box-style:border-box;margin:0px;" id="graphTab"><span class="glyphicon btn-lg glyphicon-signal"></span></button>
 		</div>
+		<br>
+		
+	</div>
+	<div class="col-xs-12 col-md-12">
+		<div id="commentsSection">
+			<textarea placeholder="Leave a response" id="comment"></textarea>
+			<br>
+			<button type="submit" id="submitComment">Save as Comment</button>
+			<button type="submit" id="saveNote" alt="Notes are not visible to classmates">Save as Note</button>
+			<div class="infobox">
+				<span class="glyphicon glyphicon-question-sign info" style="color:#ccc;"></span>
+				<span class="info">Comments are visible to anyone logged in. Your notes are only visible to you and your class administrators.</span>
+			</div>
+			<br><br>
+			<div id="commentsHeader">
+				<span style="font-size:18px;">Replies</span>
+				<span id="searchButton" class="glyphicon glyphicon-search" style="float:right;margin:5px;font-size:12px"></span>
+				<input id="search" placeholder="Search Replies" class="form-control" style="width:200px;display:inline;padding:5px;float:right;height:25px;">
+				<div id="searchResults" style="display:none;"></div>
+			</div>
+			<div id="comments">&nbsp;</div> 
+		</div>
 
 		<div id="bookmarksSection">
-			
+			<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark<!--<span id="clock">00:00</span>--></button>
+			<span id="bookmarks">&nbsp;</span>
+		</div>
+
+		<div id="cutsSection">
+			<div id="cuts"></div>
 		</div>
 
 		<div id="graphSection">
 			<!--<p><button type="submit" id="sendData">Send View stats</button></p>-->
+			<div id="chartWrapper" style="display:none"><div id="chart_div" style="width: 900px; height: 500px;">Loading View Stats</div></div>
+		</div>
 			
-		</div>
-
-
-		<br>
-		
-		<br>
-		<button type="submit" id="toggleGraph"><span class="glyphicon glyphicon-signal"></span></button>
-		<button type="submit" id="bookmark"><span class="glyphicon glyphicon-bookmark"></span> Bookmark<!--<span id="clock">00:00</span>--></button>
-		<span id="bookmarks">&nbsp;</span>
-		<p>
-		<p><button type="submit" id="playCut">Quick Review</button></p>
-		<div id="chartWrapper" style="display:none"><div id="chart_div" style="width: 900px; height: 500px;">Loading View Stats</div></div>
-		<textarea placeholder="Leave a response" id="comment"></textarea>
-		</p>
-		<button type="submit" id="submitComment">Save as Comment</button>
-		<button type="submit" id="saveNote" alt="Notes are not visible to classmates">Save as Note</button>
-		<div class="infobox">
-			<span class="glyphicon glyphicon-question-sign info" style="color:#ccc;"></span>
-			<span class="info">Comments are visible to anyone logged in. Your notes are only visible to you and your class administrators.</span>
-		</div>
-	</div>
-	<div class="col-xs-12 col-md-12">
-		<div id="commentsSection">
-			<span style="font-size:18px;">Replies</span>
-			<span id="searchButton" class="glyphicon glyphicon-search" style="float:right;margin:5px;font-size:12px"></span><input id="search" placeholder="Search Replies" class="form-control" style="width:200px;display:inline;padding:5px;float:right;height:25px;">
-			<div id="searchResults" style="display:none;"></div>
-		</div>
-		<div id="comments">&nbsp;</div> 
 	</div>
 </div>
 
