@@ -1,16 +1,18 @@
 
 var videoChart = {
 	enabled: false,
-	toggleGraph: function() {
-		this.enabled = !this.enabled;
+	toggleGraph: function(on) {
+		this.enabled = on;
 		if(this.enabled) videoChart.drawChart();
-		$('#chartWrapper').toggle();
+		this.enabled ? $("#graphSection").show() : $("#graphSection").hide();
 	},
 	drawChart: function() {
 		if(!this.enabled) return;
 		var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
 		var graphData = [['% Video Time', 'Views']];
-		$.get(GRAPHCALL, {video_id: VIDEO_ID}, function(functionData) {
+		//console.log($("#graphStudents").val());
+		$.get(GRAPHCALL, {video_id: VIDEO_ID, student_id: $("#graphStudents").val()}, function(functionData) {
+			console.log(functionData);
 			var split = functionData.split(",");
 			for(var i = 0; i < split.length; i++) {
 				thing = ['', parseInt(split[i])];
@@ -18,7 +20,7 @@ var videoChart = {
 			}
 			var options = {
 				title: 'Views over Video Time',
-				hAxis: {title: 'Time'},
+				hAxis: {title: 'Time (start through end of video)'},
 				vAxis: {title: 'Views'},
 				legend: 'none'
 			};
@@ -214,6 +216,18 @@ var videoPlayer = {
 		console.log("Called playTimes");
 		// Don't access this function directly. Use videoPlayer.playTime instead.
 		var offset = cut[i] + duration[i] - videoPlayer.player.getCurrentTime();
+		var waitForEndTime = function(){
+		    clearInterval(waitInterval);
+		    offset = cut[i] + duration[i] - videoPlayer.player.getCurrentTime();
+		    console.log("Offset: " + offset);
+		    if(offset > 10) {
+		    	waitInterval = setInterval(waitForEndTime, offset);
+		    }
+		    else {
+		    	console.log("Finished with offset " + offset);
+		    }
+		}
+		var waitInterval = setInterval(waitForEndTime, offset);
 		/*if(offset > 0) { // Check that player has reached end of interval
 			console.log("Delaying");
 			setTimeout( // Delay until end of interval
@@ -393,30 +407,31 @@ $(document).ready(function() {
 
 	videoPlayer.loadAPI();
 	videoBookmarks.getBookmarks();
-	
+
 	$("#commentsTab").click(function(){
 		$("#commentsSection").show();
 		$("#bookmarksSection").hide();
 		$("#cutsSection").hide();
-		$("#graphSection").hide();
+		videoChart.toggleGraph(false); // Turn off graph
 	});	
 	$("#bookmarksTab").click(function(){
 		$("#commentsSection").hide();
 		$("#bookmarksSection").show();
 		$("#cutsSection").hide();
-		$("#graphSection").hide();
+		videoChart.toggleGraph(false); // Turn off graph
 	});	
 	$("#cutsTab").click(function(){
 		$("#commentsSection").hide();
 		$("#bookmarksSection").hide();
 		$("#cutsSection").show();
-		$("#graphSection").hide();
+		videoChart.toggleGraph(false); // Turn off graph
 	});	
 	$("#graphTab").click(function(){
 		$("#commentsSection").hide();
 		$("#bookmarksSection").hide();
 		$("#cutsSection").hide();
-		$("#graphSection").show();
+		videoChart.toggleGraph(true); // Turn on graph
+
 	});
 
 	$('#search').submit(function(){
@@ -645,8 +660,9 @@ $(document).ready(function() {
 		videoViews.sendToDB();
 	});
 
-	$("#graphTab").click(function(){
-		videoChart.toggleGraph();
+	$("#graphStudents").change(function() {
+		console.log("Drawing chart");
+		videoChart.drawChart();
 	});
 
 	$(document.body).on('click', '#settings_save', function(){

@@ -11,15 +11,35 @@ $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'link_id'));
 	else {
 		$video_id = Settings::linkGet('video');
 	}
-	$total_views = $PDOX->rowDie("SELECT * FROM video_views
-		WHERE link_id = :LID
-		AND video_id = :VID
-		LIMIT 1;",
-		array(
-			":LID" => $LINK->id,
-			":VID" => $video_id
-		)
-	);
+	$user_id = $_GET['student_id'];
+	if($user_id == "") {
+		$total_views = $PDOX->rowDie("SELECT * FROM video_views
+			WHERE link_id = :LID
+			AND video_id = :VID
+			LIMIT 1;",
+			array(
+				":LID" => $LINK->id,
+				":VID" => $video_id
+			)
+		);
+	}
+	else {
+		if(!($USER->instructor)) {
+			$user_id = $USER->id;
+		}
+		$total_views = $PDOX->rowDie("SELECT * FROM video_views_by_student
+			WHERE user_id = :UID
+			AND link_id = :LID
+			AND video_id = :VID
+			LIMIT 1;",
+			array(
+				":UID" => $user_id,
+				":LID" => $LINK->id,
+				":VID" => $video_id
+			)
+		);
+	}
 	//$total_views_vector = array_map("intval", explode(",", $total_views['view_vector']));
-	echo $total_views['view_vector'];
+	if(isset($total_views['view_vector'])) echo $total_views['view_vector'];
+	else echo "asdf";
 ?>

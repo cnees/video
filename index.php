@@ -5,7 +5,6 @@ require_once $CFG->dirroot."/pdo.php";
 use \Tsugi\Core\Settings;
 use \Tsugi\Core\LTIX;
 use \Tsugi\UI\SettingsForm;
-
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id'));
 
@@ -36,10 +35,10 @@ if ( $USER->instructor ) {
 		<br>
 				
 		<div style="width:100%;text-align:center;">
-			<button style="width:25%;box-style:border-box;margin:0px;" id="commentsTab"><span class="glyphicon btn-lg glyphicon-comment"></span></button><button
-					style="width:25%;box-style:border-box;margin:0px;" id="bookmarksTab"><span class="glyphicon btn-lg glyphicon-bookmark"></span></button><button
-					style="width:25%;box-style:border-box;margin:0px;" id="cutsTab"><span class="glyphicon btn-lg glyphicon-film"></span></button><button
-					style="width:25%;box-style:border-box;margin:0px;" id="graphTab"><span class="glyphicon btn-lg glyphicon-signal"></span></button>
+			<button style="width:25%;box-style:border-box;margin:0px;" id="commentsTab"><span class="glyphicon btn-lg glyphicon-comment"></span><br><span>comments</span></button><button
+					style="width:25%;box-style:border-box;margin:0px;" id="bookmarksTab"><span class="glyphicon btn-lg glyphicon-bookmark"></span><br><span>bookmarks</span></button><button
+					style="width:25%;box-style:border-box;margin:0px;" id="cutsTab"><span class="glyphicon btn-lg glyphicon-film"></span><br><span>remixes</span></button><button
+					style="width:25%;box-style:border-box;margin:0px;" id="graphTab"><span class="glyphicon btn-lg glyphicon-signal"></span><br><span>views</span></button>
 		</div>
 		<br>
 		
@@ -70,12 +69,24 @@ if ( $USER->instructor ) {
 		</div>
 
 		<div id="cutsSection">
+			<ul>
+				<li>Select a clip from the video with the slider</li>
+				<li>Use the + to add more sliders</li>
+				<li>Press "Play" to watch the clips from top to bottom</li>
+				<li>Save and share features coming soon</li>
+			</ul>
+			</p>
+			<p><button type="submit" id="playCuts">Play</button></p>
 			<div id="cuts"></div>
 		</div>
 
 		<div id="graphSection">
 			<!--<p><button type="submit" id="sendData">Send View stats</button></p>-->
-			<div id="chartWrapper" style="display:none"><div id="chart_div" style="width: 900px; height: 500px;">Loading View Stats</div></div>
+			View stats for 
+			<?php
+				require_once "listUsers.php";
+			?>
+			<div id="chartWrapper"><div id="chart_div" style="width: 900px; height: 500px;">Loading View Stats</div></div>
 		</div>
 			
 	</div>
@@ -104,7 +115,7 @@ $OUTPUT->footerStart();
 			ADDVIDEOCALL = "<?=addSession('addVideo.php')?>";
 			REPORTCALL = "<?=addSession('report.php')?>";
 			VIDEO_ID = "<?=Settings::linkGet('video');?>";
-			USER_ID = <?=$USER->id;?>;
+			USER_ID = <?=$USER->id;?>;  
 		</script>
 		<script src="video.js?v=<?=rand()?>"></script>
 
