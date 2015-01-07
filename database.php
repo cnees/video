@@ -56,10 +56,6 @@ $DATABASE_INSTALL = array(
   ) ENGINE=InnoDB AUTO_INCREMENT=285 DEFAULT CHARSET=utf8;
   "),
 
-  array( "{$CFG->dbprefix}video_comments",
-  "ALTER TABLE `{$CFG->dbprefix}video_comments` ADD FULLTEXT(`comment`);
-  "),
-
   // This is separate from the CREATE TABLE command because it won't work in older versions of MySQL.
   // It makes the comments searchable.
   
@@ -71,7 +67,7 @@ $DATABASE_INSTALL = array(
     `videoTime` int(11) NOT NULL,
     `user_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `videoTime` (`video_id`,`link_id`,`videoTime`,`user_id`),
+    UNIQUE KEY `{$CFG->dbprefix}videoTime` (`video_id`,`link_id`,`videoTime`,`user_id`),
     KEY `{$CFG->dbprefix}video_bookmarks_ibfk_1` (`link_id`),
     KEY `{$CFG->dbprefix}video_bookmarks_ibfk_2` (`user_id`),
     KEY `{$CFG->dbprefix}video_bookmark_key` (`link_id`,`video_id`),
@@ -105,7 +101,7 @@ $DATABASE_INSTALL = array(
     `view_vector` varchar(300) NOT NULL,
     `user_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `user_id` (`user_id`,`link_id`,`video_id`),
+    UNIQUE KEY `{$CFG->dbprefix}user_id` (`user_id`,`link_id`,`video_id`),
     KEY `{$CFG->dbprefix}video_views_by_student_ibfk_1` (`link_id`),
     KEY `{$CFG->dbprefix}video_views_by_student_key` (`link_id`,`video_id`),
     CONSTRAINT `{$CFG->dbprefix}video_views_by_student_ibfk_2` FOREIGN KEY (`user_id`) 
@@ -116,3 +112,28 @@ $DATABASE_INSTALL = array(
   ")
 
 );
+
+// Data base upgrade
+
+$DATABASE_UPGRADE = function($oldversion) {
+    global $CFG, $PDOX;
+
+    // Version 201501061040 improvements
+    // Per http://dev.mysql.com/doc/refman/5.6/en/fulltext-restrictions.html
+    // "FULLTEXT index support for InnoDB tables requires MySQL 5.6.4 or higher."
+    // So if this fails - no big deal
+    if ( $oldversion < 201501061040 ) {
+        $sql= "ALTER TABLE `{$CFG->dbprefix}video_comments` ADD FULLTEXT(`comment`);";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryReturnError($sql);
+        if ( ! $q->success ) {
+            echo("Non-Fatal, unable to add FULLTEXT index: ".$sql."<br/>\n");
+            error_log("Non-Fatal, unable to add FULLTEXT index: ".$sql."<br/>\n");
+        }
+    }
+
+    return 201501061040;
+}; // Don't forget the semicolon on anonymous functions :)
+
+
