@@ -13,7 +13,7 @@ $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'link_id'));
 	}
 	$user_id = $_GET['student_id'];
 	if($user_id == "") {
-		$total_views = $PDOX->rowDie("SELECT * FROM video_views
+		$total_views = $PDOX->rowDie("SELECT * FROM {$CFG->dbprefix}video_views
 			WHERE link_id = :LID
 			AND video_id = :VID
 			LIMIT 1;",
@@ -27,7 +27,7 @@ $LTI = \Tsugi\Core\LTIX::requireData(array('user_id', 'link_id'));
 		if(!($USER->instructor)) {
 			$user_id = $USER->id;
 		}
-		$total_views = $PDOX->rowDie("SELECT * FROM video_views_by_student
+		$total_views = $PDOX->rowDie("SELECT * FROM {$CFG->dbprefix}video_views_by_student
 			WHERE user_id = :UID
 			AND link_id = :LID
 			AND video_id = :VID

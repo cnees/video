@@ -9,7 +9,7 @@ $video_id = Settings::linkGet('video');
 
 $input_vector = $_POST['vector'];
 
-$user_views = $PDOX->rowDie("SELECT * FROM video_views_by_student
+$user_views = $PDOX->rowDie("SELECT * FROM {$CFG->dbprefix}video_views_by_student
 	WHERE user_id = :UID
 	AND link_id = :LID
 	AND video_id = :VID
@@ -21,7 +21,7 @@ $user_views = $PDOX->rowDie("SELECT * FROM video_views_by_student
 	)
 );
 
-$total_views = $PDOX->rowDie("SELECT * FROM video_views
+$total_views = $PDOX->rowDie("SELECT * FROM {$CFG->dbprefix}video_views
 	WHERE link_id = :LID
 	AND video_id = :VID
 	LIMIT 1;",
@@ -47,7 +47,7 @@ if(count($user_views_vector) > 1) {
 	}
 }
 
-$PDOX->queryDie("INSERT INTO video_views_by_student(user_id, view_vector, link_id, video_id)
+$PDOX->queryDie("INSERT INTO {$CFG->dbprefix}video_views_by_student(user_id, view_vector, link_id, video_id)
 	VALUES(:UID, :VEC, :LID, :VID)
 	ON DUPLICATE KEY
 	UPDATE view_vector=:VEC",
@@ -59,7 +59,7 @@ $PDOX->queryDie("INSERT INTO video_views_by_student(user_id, view_vector, link_i
 	)
 );
 
-$PDOX->queryDie("INSERT INTO video_views(view_vector, link_id, video_id)
+$PDOX->queryDie("INSERT INTO {$CFG->dbprefix}video_views(view_vector, link_id, video_id)
 	VALUES(:VEC, :LID, :VID)
 	ON DUPLICATE KEY
 	UPDATE view_vector=:VEC",
