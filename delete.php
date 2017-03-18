@@ -1,6 +1,5 @@
 <?php
-require_once "../../config.php";
-require_once $CFG->dirroot."/pdo.php";
+require_once "../config.php";
 
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id'));

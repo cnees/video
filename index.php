@@ -1,10 +1,10 @@
 <?php
-require_once "../../config.php";
-require_once $CFG->dirroot."/pdo.php";
+require_once "../config.php";
 
 use \Tsugi\Core\Settings;
 use \Tsugi\Core\LTIX;
 use \Tsugi\UI\SettingsForm;
+
 // Sanity checks
 $LTI = \Tsugi\Core\LTIX::requireData(array('user_id'));
 
@@ -18,7 +18,6 @@ if ( SettingsForm::handleSettingsPost() ) {
 $OUTPUT->header();
 ?>
 		<link href="style.css?v=<?=rand()?>" rel="stylesheet">
-		<link href="<?php echo($CFG->staticroot); ?>/static/bootstrap-3.1.1/css/bootstrap.min.css" rel="stylesheet">
 <?php
 $OUTPUT->bodyStart();
 $OUTPUT->flashMessages();
@@ -101,7 +100,6 @@ if ( $USER->instructor ) {
 $OUTPUT->footerStart();
 ?>
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-		<script src="jquery-ui-1.11.2.custom/jquery-ui.min.js?v=<?=rand()?>"></script>
 		<script>
 
             // Javascript at the end to speed loading

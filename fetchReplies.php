@@ -1,6 +1,5 @@
 <?
-require_once "../../config.php";
-require_once $CFG->dirroot."/pdo.php";
+require_once "../config.php";
 
 if(!isset($_GET['parentID'])) die();
 $parent = $_GET['parentID'];
