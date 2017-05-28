@@ -14,20 +14,21 @@ $DATABASE_UNINSTALL = array(
 $DATABASE_INSTALL = array(
 
   array( "{$CFG->dbprefix}video_ids",
-  "CREATE TABLE `video_ids` (
+  "CREATE TABLE `{$CFG->dbprefix}video_ids` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `video_id` varchar(11) NOT NULL DEFAULT '',
     `link_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `video_key` (`video_id`,`id`),
-    UNIQUE KEY `uniqe_video` (`link_id`,`video_id`),
+    UNIQUE KEY `{$CFG->dbprefix}video_key` (`video_id`,`id`),
+    UNIQUE KEY `{$CFG->dbprefix}uniqe_video` (`link_id`,`video_id`),
     KEY `id` (`id`,`video_id`),
-    CONSTRAINT `video_ids_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `t_lti_link` (`link_id`) ON DELETE CASCADE
+    CONSTRAINT `{$CFG->dbprefix}video_ids_ibfk_1` FOREIGN KEY (`link_id`) 
+        REFERENCES `{$CFG->dbprefix}lti_link` (`link_id`) ON DELETE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
   "),
 
   array( "{$CFG->dbprefix}video_comments",
-  "CREATE TABLE `video_comments` (
+  "CREATE TABLE `{$CFG->dbprefix}video_comments` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `video_id` varchar(11) NOT NULL DEFAULT '',
     `link_id` int(11) NOT NULL,
@@ -40,67 +41,99 @@ $DATABASE_INSTALL = array(
     `user_id` int(11) NOT NULL,
     `displayname` varchar(2048) DEFAULT NULL,
     PRIMARY KEY (`id`),
-    KEY `video_ibfk_1` (`link_id`),
-    KEY `video_ibfk_2` (`user_id`),
-    KEY `video_comments_ibfk_1` (`parent`),
-    KEY `video_key` (`link_id`,`video_id`),
-    CONSTRAINT `video_comments_ibfk_1` FOREIGN KEY (`parent`) REFERENCES `video_comments` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `video_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `video_key` FOREIGN KEY (`link_id`, `video_id`) REFERENCES `video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+    KEY `{$CFG->dbprefix}video_ibfk_1` (`link_id`),
+    KEY `{$CFG->dbprefix}video_ibfk_2` (`user_id`),
+    KEY `{$CFG->dbprefix}video_comments_ibfk_1` (`parent`),
+    KEY `{$CFG->dbprefix}video_key` (`link_id`,`video_id`),
+    CONSTRAINT `{$CFG->dbprefix}video_comments_ibfk_1` FOREIGN KEY (`parent`) 
+        REFERENCES `{$CFG->dbprefix}video_comments` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `{$CFG->dbprefix}video_ibfk_2` FOREIGN KEY (`user_id`) 
+        REFERENCES `{$CFG->dbprefix}lti_user` (`user_id`) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `{$CFG->dbprefix}video_key` FOREIGN KEY (`link_id`, `video_id`) 
+        REFERENCES `{$CFG->dbprefix}video_ids` (`link_id`, `video_id`) 
+        ON DELETE CASCADE ON UPDATE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=285 DEFAULT CHARSET=utf8;
   "),
 
-  array( "{$CFG->dbprefix}video_comments",
-  "ALTER TABLE `video_comments` ADD FULLTEXT(`comment`);
-  "),
   // This is separate from the CREATE TABLE command because it won't work in older versions of MySQL.
   // It makes the comments searchable.
   
   array( "{$CFG->dbprefix}video_bookmarks",
-  "CREATE TABLE `video_bookmarks` (
+  "CREATE TABLE `{$CFG->dbprefix}video_bookmarks` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `video_id` varchar(11) NOT NULL DEFAULT '',
     `link_id` int(11) NOT NULL,
     `videoTime` int(11) NOT NULL,
     `user_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `videoTime` (`video_id`,`link_id`,`videoTime`,`user_id`),
-    KEY `video_bookmarks_ibfk_1` (`link_id`),
-    KEY `video_bookmarks_ibfk_2` (`user_id`),
-    KEY `video_bookmark_key` (`link_id`,`video_id`),
-    CONSTRAINT `video_bookmarks_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `video_bookmark_key` FOREIGN KEY (`link_id`, `video_id`) REFERENCES `video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+    UNIQUE KEY `{$CFG->dbprefix}videoTime` (`video_id`,`link_id`,`videoTime`,`user_id`),
+    KEY `{$CFG->dbprefix}video_bookmarks_ibfk_1` (`link_id`),
+    KEY `{$CFG->dbprefix}video_bookmarks_ibfk_2` (`user_id`),
+    KEY `{$CFG->dbprefix}video_bookmark_key` (`link_id`,`video_id`),
+    CONSTRAINT `{$CFG->dbprefix}video_bookmarks_ibfk_2` FOREIGN KEY (`user_id`) 
+        REFERENCES `{$CFG->dbprefix}lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `{$CFG->dbprefix}video_bookmark_key` FOREIGN KEY (`link_id`, `video_id`) 
+        REFERENCES `{$CFG->dbprefix}video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=utf8;
   "),
 
   array( "{$CFG->dbprefix}video_views",
-  "CREATE TABLE `video_views` (
+  "CREATE TABLE `{$CFG->dbprefix}video_views` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `video_id` varchar(11) NOT NULL DEFAULT '',
     `link_id` int(11) NOT NULL,
     `view_vector` varchar(300) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `video_view_key` (`video_id`,`link_id`),
-    KEY `video_views_ibfk_1` (`link_id`),
-    KEY `video_view_key_1` (`link_id`,`video_id`),
-    CONSTRAINT `video_view_key_1` FOREIGN KEY (`link_id`, `video_id`) REFERENCES `video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+    UNIQUE KEY `{$CFG->dbprefix}video_view_key` (`video_id`,`link_id`),
+    KEY `{$CFG->dbprefix}video_views_ibfk_1` (`link_id`),
+    KEY `{$CFG->dbprefix}video_view_key_1` (`link_id`,`video_id`),
+    CONSTRAINT `{$CFG->dbprefix}video_view_key_1` FOREIGN KEY (`link_id`, `video_id`) 
+        REFERENCES `{$CFG->dbprefix}video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=2222 DEFAULT CHARSET=utf8;
   "),
 
   array( "{$CFG->dbprefix}video_views_by_student",
-  "CREATE TABLE `video_views_by_student` (
+  "CREATE TABLE `{$CFG->dbprefix}video_views_by_student` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `video_id` varchar(11) NOT NULL DEFAULT '',
     `link_id` int(11) NOT NULL,
     `view_vector` varchar(300) NOT NULL,
     `user_id` int(11) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `user_id` (`user_id`,`link_id`,`video_id`),
-    KEY `video_views_by_student_ibfk_1` (`link_id`),
-    KEY `video_views_by_student_key` (`link_id`,`video_id`),
-    CONSTRAINT `video_views_by_student_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `video_views_by_student_key` FOREIGN KEY (`link_id`, `video_id`) REFERENCES `video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+    UNIQUE KEY `{$CFG->dbprefix}user_id` (`user_id`,`link_id`,`video_id`),
+    KEY `{$CFG->dbprefix}video_views_by_student_ibfk_1` (`link_id`),
+    KEY `{$CFG->dbprefix}video_views_by_student_key` (`link_id`,`video_id`),
+    CONSTRAINT `{$CFG->dbprefix}video_views_by_student_ibfk_2` FOREIGN KEY (`user_id`) 
+        REFERENCES `{$CFG->dbprefix}lti_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `{$CFG->dbprefix}video_views_by_student_key` FOREIGN KEY (`link_id`, `video_id`) 
+        REFERENCES `{$CFG->dbprefix}video_ids` (`link_id`, `video_id`) ON DELETE CASCADE ON UPDATE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=2248 DEFAULT CHARSET=utf8;
   ")
 
 );
+
+// Data base upgrade
+
+$DATABASE_UPGRADE = function($oldversion) {
+    global $CFG, $PDOX;
+
+    // Version 201501061040 improvements
+    // Per http://dev.mysql.com/doc/refman/5.6/en/fulltext-restrictions.html
+    // "FULLTEXT index support for InnoDB tables requires MySQL 5.6.4 or higher."
+    // So if this fails - no big deal
+    if ( $oldversion < 201501061040 ) {
+        $sql= "ALTER TABLE `{$CFG->dbprefix}video_comments` ADD FULLTEXT(`comment`);";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryReturnError($sql);
+        if ( ! $q->success ) {
+            echo("Non-Fatal, unable to add FULLTEXT index: ".$sql."<br/>\n");
+            error_log("Non-Fatal, unable to add FULLTEXT index: ".$sql."<br/>\n");
+        }
+    }
+
+    return 201501061040;
+}; // Don't forget the semicolon on anonymous functions :)
+
+
